@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Well Clinic — Checklist do Dia</title>
+  <link rel="stylesheet" href="css/wellclinic.css">
+  <style>
+    /* Page-specific styles */
+    .checklist-hero-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--dourado-claro);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .checklist-hero-link:hover {
+      color: var(--dourado);
+    }
+
+    .checklist-tabs-wrapper {
+      background: var(--branco);
+      margin-bottom: 16px;
+      border-radius: var(--radius-sm);
+    }
+
+    .wc-tabs {
+      border: none;
+      background: transparent;
+      padding: 0;
+      border-bottom: 1px solid var(--cinza-leve);
+      border-radius: 0;
+      gap: 0;
+    }
+
+    .wc-tab {
+      flex: 1;
+      border-radius: 0;
+      border-bottom: 3px solid transparent;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin: 0;
+      background: transparent;
+    }
+
+    .wc-tab:hover {
+      background: var(--marfim);
+    }
+
+    .wc-tab--active {
+      background: transparent;
+      color: var(--verde);
+      border-bottom-color: var(--verde);
+    }
+
+    /* Contingência display */
+    .checklist-contingencia {
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-medio) 100%);
+      color: var(--marfim);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .checklist-contingencia__day {
+      font-family: var(--font-titulo);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .checklist-contingencia__text {
+      line-height: 1.5;
+    }
+
+    .checklist-contingencia__text strong {
+      color: var(--dourado-claro);
+    }
+
+    /* User badge in checklist */
+    .checklist-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--branco);
+      border-radius: var(--radius);
+      border: 1px solid var(--cinza-leve);
+      box-shadow: var(--sombra-sm);
+      margin-bottom: 16px;
+    }
+
+    .checklist-user-badge__avatar {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dourado-bg);
+      border-radius: 50%;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .checklist-user-badge__info {
+      flex: 1;
+    }
+
+    .checklist-user-badge__name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--azul);
+      margin-bottom: 2px;
+    }
+
+    .checklist-user-badge__role {
+      font-size: 11px;
+      color: var(--cinza-texto);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Tipo selector */
+    .checklist-tipo-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .checklist-tipo-btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--cinza-leve);
+      background: var(--branco);
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+      font-family: var(--font-corpo);
+    }
+
+    .checklist-tipo-btn:hover {
+      border-color: var(--dourado-claro);
+    }
+
+    .checklist-tipo-btn.active {
+      border-color: var(--verde);
+      background: var(--verde-bg);
+      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.1);
+    }
+
+    .checklist-tipo-btn__icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .checklist-tipo-btn__label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--azul);
+    }
+
+    /* Checklist items grouping */
+    .checklist-area-group {
+      margin-bottom: 20px;
+      animation: wc-fadeUp 0.4s ease both;
+    }
+
+    .checklist-area-group:nth-child(1) { animation-delay: 0.05s; }
+    .checklist-area-group:nth-child(2) { animation-delay: 0.10s; }
+    .checklist-area-group:nth-child(3) { animation-delay: 0.15s; }
+    .checklist-area-group:nth-child(4) { animation-delay: 0.20s; }
+    .checklist-area-group:nth-child(5) { animation-delay: 0.25s; }
+
+    .checklist-area-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0 8px 0;
+      margin-bottom: 8px;
+    }
+
+    .checklist-area-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dourado);
+      flex-shrink: 0;
+    }
+
+    .checklist-area-name {
+      font-family: var(--font-titulo);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--azul);
+      flex: 1;
+    }
+
+    .checklist-area-setor {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--cinza-texto);
+      background: var(--cinza-leve);
+      padding: 2px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Override for checklist item styling */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--branco);
+      border: 1px solid var(--cinza-leve);
+      border-left: 3px solid transparent;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .checklist-item:hover {
+      border-color: var(--dourado-claro);
+      box-shadow: var(--sombra-md);
+    }
+
+    .checklist-item.checked {
+      background: var(--verde-bg);
+      border-left-color: var(--verde);
+      border-color: var(--verde);
+    }
+
+    .checklist-item.alta.checked {
+      border-left-color: var(--verde);
+    }
+
+    .checklist-item__checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--cinza-leve);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: var(--transition);
+      margin-top: 2px;
+    }
+
+    .checklist-item.checked .checklist-item__checkbox {
+      background: var(--verde);
+      border-color: var(--verde);
+      color: var(--branco);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .checklist-item__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .checklist-item__text {
+      font-size: 13px;
+      color: var(--grafite);
+      line-height: 1.4;
+    }
+
+    .checklist-item.checked .checklist-item__text {
+      text-decoration: line-through;
+      color: var(--cinza-texto);
+    }
+
+    .checklist-item__priority {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--vermelho);
+      margin-top: 4px;
+    }
+
+    /* Progress section */
+    .checklist-progress-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--sombra-sm);
+      margin-bottom: 16px;
+    }
+
+    .checklist-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .checklist-progress-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--azul);
+    }
+
+    .checklist-progress-count {
+      font-size: 13px;
+      color: var(--dourado);
+      font-weight: 600;
+    }
+
+    .checklist-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--cinza-leve);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .checklist-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--verde), var(--verde-claro));
+      border-radius: 4px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+
+    /* Observações section */
+    .checklist-obs-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--sombra-sm);
+      margin-bottom: 16px;
+    }
+
+    .checklist-obs-card label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--dourado);
+      margin-bottom: 10px;
+    }
+
+    .checklist-obs-card textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: var(--font-corpo);
+      font-size: 13px;
+      border: 1.5px solid var(--cinza-leve);
+      border-radius: var(--radius-sm);
+      background: var(--branco);
+      color: var(--grafite);
+      resize: vertical;
+      min-height: 80px;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .checklist-obs-card textarea:focus {
+      border-color: var(--verde);
+      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.12);
+    }
+
+    /* Signature section */
+    .checklist-sig-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--sombra-sm);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .checklist-sig-card label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--dourado);
+      margin-bottom: 12px;
+    }
+
+    #checklistSignatureCanvas {
+      width: 100%;
+      height: 120px;
+      border: 2px dashed var(--cinza-leve);
+      border-radius: var(--radius-sm);
+      background: var(--marfim);
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    #checklistSignatureCanvas.signed {
+      border-color: var(--verde);
+      border-style: solid;
+    }
+
+    .checklist-clear-sig {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--cinza-texto);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: var(--font-corpo);
+      transition: var(--transition);
+    }
+
+    .checklist-clear-sig:hover {
+      color: var(--vermelho);
+    }
+
+    /* Submit button */
+    .checklist-submit-btn {
+      width: 100%;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 100px;
+    }
+
+    /* Reservas tab styles */
+    .checklist-reserva-form-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--sombra-sm);
+      margin-bottom: 20px;
+    }
+
+    .checklist-form-section-title {
+      font-family: var(--font-titulo);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--azul);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--dourado);
+    }
+
+    .checklist-form-group {
+      margin-bottom: 16px;
+    }
+
+    .checklist-form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--dourado);
+      margin-bottom: 8px;
+    }
+
+    .checklist-form-group input,
+    .checklist-form-group select,
+    .checklist-form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font-family: var(--font-corpo);
+      font-size: 13px;
+      border: 1.5px solid var(--cinza-leve);
+      border-radius: var(--radius-sm);
+      background: var(--branco);
+      color: var(--grafite);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .checklist-form-group input:focus,
+    .checklist-form-group select:focus,
+    .checklist-form-group textarea:focus {
+      border-color: var(--verde);
+      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.12);
+    }
+
+    .checklist-form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .checklist-form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .checklist-form-row > .checklist-form-group {
+      flex: 1;
+    }
+
+    /* Reserva list */
+    .checklist-reserva-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--sombra-sm);
+      border: 1px solid var(--cinza-leve);
+      margin-bottom: 12px;
+    }
+
+    .checklist-reserva-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .checklist-reserva-card__title {
+      font-family: var(--font-titulo);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--azul);
+    }
+
+    .checklist-reserva-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .checklist-reserva-status.pendente {
+      background: rgba(160, 137, 108, 0.15);
+      color: var(--dourado);
+    }
+
+    .checklist-reserva-status.aprovada {
+      background: var(--verde-bg);
+      color: var(--verde);
+    }
+
+    .checklist-reserva-status.rejeitada {
+      background: var(--vermelho-bg);
+      color: var(--vermelho);
+    }
+
+    .checklist-reserva-card__detail {
+      font-size: 12px;
+      color: var(--cinza-texto);
+      line-height: 1.5;
+    }
+
+    .checklist-empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--cinza-texto);
+    }
+
+    .checklist-empty-state__icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .checklist-empty-state__text {
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      .wc-container {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Auth overlays (loading, login, register) -->
+  <div id="wcLoading" class="wc-loading">
+    <div class="wc-loading__spinner"></div>
+    <div class="wc-loading__text">Carregando...</div>
+  </div>
+
+  <div id="wcLogin" class="wc-login">
+    <div class="wc-login__box">
+      <div style="font-size:32px;margin-bottom:12px;">🏥</div>
+      <div class="wc-login__title">Well Clinic</div>
+      <div class="wc-login__subtitle">Central Operacional</div>
+      <div class="wc-form-group">
+        <input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email">
+      </div>
+      <div class="wc-form-group">
+        <input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric">
+      </div>
+      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button>
+      <div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
+      <div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div>
+    </div>
+  </div>
+
+  <div id="wcRegister" class="wc-register">
+    <div class="wc-login__box">
+      <div style="font-size:32px;margin-bottom:12px;">👋</div>
+      <div class="wc-login__title">Bem-vindo!</div>
+      <div class="wc-login__subtitle" id="registerSubtitle">Configure seu acesso</div>
+      <div class="wc-form-group">
+        <label class="wc-label">Como quer ser chamado?</label>
+        <input type="text" id="registerApelido" class="wc-input" placeholder="Ex: Jonatã, Dra. Jaque, Gabi...">
+      </div>
+      <div class="wc-form-group">
+        <label class="wc-label">Crie uma senha (4+ dígitos)</label>
+        <input type="password" id="registerPin" class="wc-input" placeholder="Sua senha" inputmode="numeric">
+      </div>
+      <div class="wc-form-group">
+        <label class="wc-label">Confirme a senha</label>
+        <input type="password" id="registerPinConfirm" class="wc-input" placeholder="Repita a senha" inputmode="numeric">
+      </div>
+      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnRegister">Criar Acesso</button>
+      <div id="registerError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Hero/Header -->
+  <div class="wc-hero">
+    <div class="wc-hero-top">
+      <a href="index.html" class="wc-hero-brand">
+        <span class="brand-icon" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;">🏥</span>
+        Well Clinic Central
+      </a>
+      <a href="index.html" class="wc-hero-link">Portal ↩</a>
+    </div>
+    <div class="wc-hero-title">Checklist do Dia</div>
+  </div>
+
+  <!-- Main container -->
+  <div class="wc-container">
+
+    <!-- Tabs wrapper -->
+    <div class="checklist-tabs-wrapper">
+      <div class="wc-tabs">
+        <button class="wc-tab wc-tab--active" onclick="app.switchTab('checklist')">✅ Checklist</button>
+        <button class="wc-tab" onclick="app.switchTab('reservas')">🗓 Reservas</button>
+      </div>
+    </div>
+
+    <!-- ===== TAB: CHECKLIST ===== -->
+    <div id="tab-checklist" class="checklist-tab-content">
+
+      <!-- User badge (auto-detected from session) -->
+      <div class="checklist-user-badge" id="userBadge" style="display:none;">
+        <div class="checklist-user-badge__avatar">👤</div>
+        <div class="checklist-user-badge__info">
+          <div class="checklist-user-badge__name" id="userBadgeName">—</div>
+          <div class="checklist-user-badge__role" id="userBadgeRole">—</div>
+        </div>
+      </div>
+
+      <!-- Contingência display -->
+      <div class="checklist-contingencia" id="contingenciaDisplay" style="display:none;">
+        <div class="checklist-contingencia__day" id="contingenciaDia"></div>
+        <div class="checklist-contingencia__text">
+          Backup: <strong id="contingenciaName"></strong>
+        </div>
+      </div>
+
+      <!-- Tipo selector (Abertura / Fechamento) -->
+      <div class="checklist-tipo-selector" id="tipoSelector" style="display:none;">
+        <button class="checklist-tipo-btn" data-tipo="abertura" onclick="app.selectTipo('abertura')">
+          <div class="checklist-tipo-btn__icon">🌅</div>
+          <div class="checklist-tipo-btn__label">Abertura</div>
+        </button>
+        <button class="checklist-tipo-btn" data-tipo="fechamento" onclick="app.selectTipo('fechamento')">
+          <div class="checklist-tipo-btn__icon">🌙</div>
+          <div class="checklist-tipo-btn__label">Fechamento</div>
+        </button>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="checklist-progress-card" id="progressCard" style="display:none;">
+        <div class="checklist-progress-header">
+          <span class="checklist-progress-text" id="progressText">Progresso</span>
+          <span class="checklist-progress-count" id="progressCount">0 / 0</span>
+        </div>
+        <div class="checklist-progress-bar">
+          <div class="checklist-progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Checklist items container -->
+      <div id="checklistItemsContainer"></div>
+
+      <!-- Observações -->
+      <div class="checklist-obs-card" id="obsCard" style="display:none;">
+        <label>Observações (opcional)</label>
+        <textarea id="obsText" placeholder="Alguma observação ou pendência..."></textarea>
+      </div>
+
+      <!-- Signature -->
+      <div class="checklist-sig-card" id="sigCard" style="display:none;">
+        <label>Assinatura Digital</label>
+        <canvas id="checklistSignatureCanvas" class="wc-signature"></canvas>
+        <button class="checklist-clear-sig" onclick="app.clearSignature()">Limpar assinatura</button>
+      </div>
+
+      <!-- Submit button -->
+      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg checklist-submit-btn" id="submitBtn" style="display:none;" onclick="app.submitChecklist()" disabled>
+        Registrar Checklist
+      </button>
+    </div>
+
+    <!-- ===== TAB: RESERVAS ===== -->
+    <div id="tab-reservas" class="checklist-tab-content" style="display:none;">
+
+      <!-- New reservation form -->
+      <div class="checklist-reserva-form-card">
+        <div class="checklist-form-section-title">Nova Reserva de Cilindro</div>
+
+        <div class="checklist-form-group">
+          <label>Cilindro</label>
+          <select id="reservaCilindro">
+            <option value="">Selecione um cilindro...</option>
+          </select>
+        </div>
+
+        <div class="checklist-form-group">
+          <label>Motivo da Reserva</label>
+          <textarea id="reservaMotivo" placeholder="Descreva brevemente o motivo..."></textarea>
+        </div>
+
+        <button class="wc-btn wc-btn--primary wc-btn--full" onclick="app.submitReserva()">
+          Solicitar Reserva
+        </button>
+      </div>
+
+      <!-- Reservas list -->
+      <div class="checklist-form-section-title">Reservas Pendentes</div>
+      <div id="reservasListContainer">
+        <div class="checklist-empty-state">
+          <div class="checklist-empty-state__icon">⏳</div>
+          <div class="checklist-empty-state__text">Carregando reservas...</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast container -->
+  <div class="wc-toast-container" id="wcToastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════
+    // CHECKLIST APPLICATION
+    // ════════════════════════════════════════════════════════════════
+
+    const app = {
+      user: null,
+      currentTab: 'checklist',
+      checklistItems: [],
+      checkedItems: new Set(),
+      currentTipo: null,
+      signatureHelper: null,
+      signatureHasSigned: false,
+
+      // ─── Initialize ───
+      async init() {
+        const authResult = await WC.auth.init();
+
+        if (!authResult.authenticated) {
+          // Show login (already handled by auth.init())
+          WC.ui.bindAuthEvents();
+          return;
+        }
+
+        // Authenticated: load page content
+        WC.ui.hideLoading();
+        this.user = WC.auth.getUser();
+
+        if (!this.user) {
+          window.location.href = WC.config.BASE_URL;
+          return;
+        }
+
+        // Show user badge
+        this.updateUserBadge();
+
+        // Initialize API
+        WC.api.init();
+
+        // Load contingência info
+        this.loadContingencia();
+
+        // Load checklist items
+        await this.loadChecklistItems();
+
+        // Load reservas list
+        await this.loadReservas();
+
+        // Setup signature canvas
+        this.setupSignatureCanvas();
+
+        // Show tipo selector
+        document.getElementById('tipoSelector').style.display = 'flex';
+        document.getElementById('progressCard').style.display = 'block';
+        document.getElementById('obsCard').style.display = 'block';
+        document.getElementById('sigCard').style.display = 'block';
+        document.getElementById('submitBtn').style.display = 'block';
+      },
+
+      updateUserBadge() {
+        const badge = document.getElementById('userBadge');
+        const name = document.getElementById('userBadgeName');
+        const role = document.getElementById('userBadgeRole');
+
+        name.textContent = WC.auth.getDisplayName();
+        role.textContent = this.user.cargo || 'Equipe';
+        badge.style.display = 'flex';
+      },
+
+      loadContingencia() {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const backup = WC.config.CONTINGENCIA[dayOfWeek] || 'Jonatã';
+
+        const daysName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const display = document.getElementById('contingenciaDisplay');
+        document.getElementById('contingenciaDia').textContent = daysName[dayOfWeek];
+        document.getElementById('contingenciaName').textContent = backup;
+        display.style.display = 'block';
+      },
+
+      async loadChecklistItems() {
+        try {
+          const resp = await WC.api.get(WC.config.API_CHECKLIST, { action: 'checklist_items' });
+
+          if (resp && Array.isArray(resp)) {
+            this.checklistItems = resp;
+          }
+        } catch (e) {
+          WC.ui.toast('Erro ao carregar itens do checklist', 'error');
+          console.error(e);
+        }
+
+        this.renderChecklistItems();
+      },
+
+      renderChecklistItems() {
+        const container = document.getElementById('checklistItemsContainer');
+        if (!this.checklistItems || this.checklistItems.length === 0) {
+          container.innerHTML = `
+            <div class="checklist-empty-state">
+              <div class="checklist-empty-state__icon">📋</div>
+              <div class="checklist-empty-state__text">Nenhum item carregado</div>
+            </div>
+          `;
+          return;
+        }
+
+        // Group by area/setor
+        const grouped = {};
+        this.checklistItems.forEach(item => {
+          const area = item.area || 'Geral';
+          if (!grouped[area]) grouped[area] = [];
+          grouped[area].push(item);
+        });
+
+        let html = '';
+        Object.keys(grouped).forEach(area => {
+          html += `
+            <div class="checklist-area-group">
+              <div class="checklist-area-header">
+                <div class="checklist-area-dot"></div>
+                <div class="checklist-area-name">${area}</div>
+                ${grouped[area][0].setor ? `<div class="checklist-area-setor">${grouped[area][0].setor}</div>` : ''}
+              </div>
+          `;
+
+          grouped[area].forEach(item => {
+            const checked = this.checkedItems.has(item.id) ? 'checked' : '';
+            const priorityClass = item.prioridade === 'Alta' ? 'alta' : '';
+            const checkmark = this.checkedItems.has(item.id) ? '✓' : '';
+
+            html += `
+              <div class="checklist-item ${checked} ${priorityClass}" data-id="${item.id}" onclick="app.toggleItem('${item.id}')">
+                <div class="checklist-item__checkbox">${checkmark}</div>
+                <div class="checklist-item__content">
+                  <div class="checklist-item__text">${item.descricao || item.description}</div>
+                  ${item.prioridade === 'Alta' ? '<div class="checklist-item__priority">Alta Prioridade</div>' : ''}
+                </div>
+              </div>
+            `;
+          });
+
+          html += '</div>';
+        });
+
+        container.innerHTML = html;
+      },
+
+      toggleItem(id) {
+        if (this.checkedItems.has(id)) {
+          this.checkedItems.delete(id);
+        } else {
+          this.checkedItems.add(id);
+        }
+
+        this.renderChecklistItems();
+        this.updateProgress();
+      },
+
+      updateProgress() {
+        const total = this.checklistItems.length;
+        const done = this.checkedItems.size;
+        const pct = total > 0 ? (done / total) * 100 : 0;
+
+        document.getElementById('progressFill').style.width = `${pct}%`;
+        document.getElementById('progressCount').textContent = `${done} / ${total}`;
+
+        const text = document.getElementById('progressText');
+        if (pct === 100) {
+          text.textContent = '✅ Tudo verificado!';
+          text.style.color = 'var(--verde)';
+        } else if (pct >= 50) {
+          text.textContent = 'Bom progresso...';
+          text.style.color = 'var(--dourado)';
+        } else {
+          text.textContent = 'Progresso';
+          text.style.color = 'var(--azul)';
+        }
+
+        // Enable submit if has items checked and signed
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = !(done > 0 && this.signatureHasSigned);
+      },
+
+      selectTipo(tipo) {
+        this.currentTipo = tipo;
+
+        // Update UI
+        document.querySelectorAll('.checklist-tipo-btn').forEach(btn => {
+          if (btn.dataset.tipo === tipo) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+      },
+
+      async submitChecklist() {
+        if (!this.currentTipo || this.checkedItems.size === 0) {
+          WC.ui.toast('Selecione um tipo e marque pelo menos um item', 'error');
+          return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        const pendences = this.checklistItems
+          .filter(item => !this.checkedItems.has(item.id))
+          .map(item => item.descricao || item.description);
+
+        const payload = {
+          tipo_registro: 'checklist',
+          tipo: this.currentTipo,
+          responsavel: this.user.nome,
+          cargo: this.user.cargo,
+          itensConcluidos: this.checkedItems.size,
+          totalItens: this.checklistItems.length,
+          pendencias: pendences,
+          observacoes: document.getElementById('obsText').value,
+          assinatura: WC.auth.getDisplayName(),
+          session_token: (WC.auth.getSession() || {}).token
+        };
+
+        try {
+          const resp = await WC.api.post(WC.config.API_CHECKLIST, payload);
+
+          if (resp.status === 'ok' || resp.success) {
+            WC.ui.toast('✅ Checklist registrado com sucesso!', 'success');
+            setTimeout(() => this.resetChecklist(), 1500);
+          } else {
+            WC.ui.toast('Erro: ' + (resp.msg || resp.error || 'Tente novamente'), 'error');
+          }
+        } catch (e) {
+          WC.ui.toast('Erro de conexão. Tentando offline...', 'error');
+          WC.api.queueOffline(WC.config.API_CHECKLIST, payload);
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Registrar Checklist';
+      },
+
+      resetChecklist() {
+        this.checkedItems = new Set();
+        this.currentTipo = null;
+        document.getElementById('obsText').value = '';
+        this.clearSignature();
+        this.renderChecklistItems();
+        this.updateProgress();
+
+        // Reset tipo buttons
+        document.querySelectorAll('.checklist-tipo-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+      },
+
+      setupSignatureCanvas() {
+        this.signatureHelper = WC.ui.setupSignature('checklistSignatureCanvas');
+
+        if (this.signatureHelper) {
+          const canvas = document.getElementById('checklistSignatureCanvas');
+
+          // Override hasSigned tracking
+          const origHasSigned = this.signatureHelper.hasSigned.bind(this.signatureHelper);
+          Object.defineProperty(this, 'signatureHasSigned', {
+            get: () => origHasSigned(),
+            set: (val) => {
+              // Sync with signature canvas state
+            }
+          });
+
+          // Listen for signature changes
+          canvas.addEventListener('mouseup', () => {
+            this.signatureHasSigned = this.signatureHelper.hasSigned();
+            this.updateProgress();
+          });
+
+          canvas.addEventListener('touchend', () => {
+            this.signatureHasSigned = this.signatureHelper.hasSigned();
+            this.updateProgress();
+          });
+        }
+      },
+
+      clearSignature() {
+        if (this.signatureHelper) {
+          this.signatureHelper.clear();
+          this.signatureHasSigned = false;
+          this.updateProgress();
+        }
+      },
+
+      async loadReservas() {
+        const container = document.getElementById('reservasListContainer');
+
+        try {
+          const resp = await WC.api.get(WC.config.API_GASES, {
+            action: 'listar_reservas',
+            key: 'wellclinic2026admin'
+          });
+
+          if (!resp || resp.length === 0) {
+            container.innerHTML = `
+              <div class="checklist-empty-state">
+                <div class="checklist-empty-state__icon">📦</div>
+                <div class="checklist-empty-state__text">Nenhuma reserva registrada</div>
+              </div>
+            `;
+            return;
+          }
+
+          let html = '';
+          resp.forEach(r => {
+            const status = (r.status || 'pendente').toLowerCase();
+            html += `
+              <div class="checklist-reserva-card">
+                <div class="checklist-reserva-card__header">
+                  <div class="checklist-reserva-card__title">${r.cilindro || r.tipo_gas || 'Cilindro'}</div>
+                  <span class="checklist-reserva-status ${status}">${r.status || 'Pendente'}</span>
+                </div>
+                <div class="checklist-reserva-card__detail">
+                  <strong>${r.solicitante || '—'}</strong><br>
+                  ${r.motivo ? r.motivo + '<br>' : ''}
+                  ${r.data_criacao ? '<em>' + WC.ui.formatDateShort(r.data_criacao) + '</em>' : ''}
+                </div>
+              </div>
+            `;
+          });
+
+          container.innerHTML = html;
+        } catch (e) {
+          container.innerHTML = `
+            <div class="checklist-empty-state">
+              <div class="checklist-empty-state__icon">❌</div>
+              <div class="checklist-empty-state__text">Erro ao carregar reservas</div>
+            </div>
+          `;
+          console.error(e);
+        }
+      },
+
+      async submitReserva() {
+        const cilindro = document.getElementById('reservaCilindro').value;
+        const motivo = document.getElementById('reservaMotivo').value;
+
+        if (!cilindro || !motivo) {
+          WC.ui.toast('Preencha todos os campos', 'error');
+          return;
+        }
+
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        const payload = {
+          tipo_registro: 'reserva',
+          cilindro: cilindro,
+          solicitante: this.user.nome,
+          motivo: motivo,
+          session_token: (WC.auth.getSession() || {}).token
+        };
+
+        try {
+          const resp = await WC.api.post(WC.config.API_GASES, payload);
+
+          if (resp.status === 'ok' || resp.success) {
+            WC.ui.toast('✅ Reserva solicitada! Aguarde aprovação.', 'success');
+            document.getElementById('reservaCilindro').value = '';
+            document.getElementById('reservaMotivo').value = '';
+            await this.loadReservas();
+          } else {
+            WC.ui.toast('Erro: ' + (resp.msg || resp.error || 'Tente novamente'), 'error');
+          }
+        } catch (e) {
+          WC.ui.toast('Erro de conexão', 'error');
+          console.error(e);
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Solicitar Reserva';
+      },
+
+      switchTab(tab) {
+        this.currentTab = tab;
+
+        // Update tab buttons
+        document.querySelectorAll('.wc-tab').forEach(btn => {
+          btn.classList.remove('wc-tab--active');
+        });
+        event.target.classList.add('wc-tab--active');
+
+        // Update content
+        document.querySelectorAll('.checklist-tab-content').forEach(content => {
+          content.style.display = 'none';
+        });
+        document.getElementById(`tab-${tab}`).style.display = 'block';
+      }
+    };
+
+    // ─── Initialize on page load ───
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+
+    // Populate cilindro selector
+    document.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('reservaCilindro');
+      WC.config.CILINDROS.forEach(cilindro => {
+        const option = document.createElement('option');
+        option.value = cilindro.id;
+        option.textContent = `${cilindro.id} (${cilindro.tipo} - ${cilindro.capacidade})`;
+        select.appendChild(option);
+      });
+    });
+  </script>
+
+</body>
+</html>

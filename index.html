@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Well Clinic Central</title>
+  <link rel="stylesheet" href="css/wellclinic.css">
+  <style>
+    /* ── Estilos específicos do Portal Hub ── */
+    .hub-welcome {
+      font-family: var(--font-titulo);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--azul);
+      margin-bottom: 4px;
+    }
+    .hub-date {
+      font-size: 13px;
+      color: var(--cinza-texto);
+      margin-bottom: 20px;
+    }
+    .hub-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cinza-texto);
+      margin-bottom: 12px;
+    }
+    .module-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .module-link {
+      text-decoration: none;
+      color: inherit;
+    }
+    .module-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .module-arrow {
+      margin-left: auto;
+      color: var(--cinza-leve);
+      font-size: 18px;
+      transition: var(--transition);
+    }
+    .wc-card--interactive:hover .module-arrow {
+      color: var(--dourado);
+      transform: translateX(3px);
+    }
+    .hub-footer {
+      text-align: center;
+      padding: 24px 0;
+      font-size: 11px;
+      color: var(--cinza-texto);
+    }
+    .hub-footer a {
+      color: var(--dourado);
+      text-decoration: none;
+    }
+    .btn-logout {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .btn-logout:hover { color: var(--dourado-claro); }
+  </style>
+</head>
+<body>
+
+  <!-- Auth overlays (loading, login, register) -->
+  <div class="wc-loading" id="wcLoading">
+    <div class="wc-loading__spinner"></div>
+    <div class="wc-loading__text">Carregando...</div>
+  </div>
+  <div class="wc-login" id="wcLogin">
+    <div class="wc-login__box">
+      <div style="font-size:32px;margin-bottom:12px;">🏥</div>
+      <div class="wc-login__title">Well Clinic</div>
+      <div class="wc-login__subtitle">Central Operacional</div>
+      <div class="wc-form-group">
+        <input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email">
+      </div>
+      <div class="wc-form-group">
+        <input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric">
+      </div>
+      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button>
+      <div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
+      <div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div>
+    </div>
+  </div>
+  <div class="wc-register" id="wcRegister">
+    <div class="wc-login__box">
+      <div style="font-size:32px;margin-bottom:12px;">👋</div>
+      <div class="wc-login__title">Bem-vindo!</div>
+      <div class="wc-login__subtitle" id="registerSubtitle">Configure seu acesso</div>
+      <div class="wc-form-group">
+        <label class="wc-label">Como quer ser chamado?</label>
+        <input type="text" id="registerApelido" class="wc-input" placeholder="Ex: Jonatã, Dra. Jaque, Gabi...">
+      </div>
+      <div class="wc-form-group">
+        <label class="wc-label">Crie uma senha (4+ dígitos)</label>
+        <input type="password" id="registerPin" class="wc-input" placeholder="Sua senha" inputmode="numeric">
+      </div>
+      <div class="wc-form-group">
+        <label class="wc-label">Confirme a senha</label>
+        <input type="password" id="registerPinConfirm" class="wc-input" placeholder="Repita a senha" inputmode="numeric">
+      </div>
+      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnRegister">Criar Acesso</button>
+      <div id="registerError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Conteúdo principal (escondido até autenticar) -->
+  <div id="appContent" class="wc-hidden">
+
+    <div class="wc-hero">
+      <div class="wc-hero-top">
+        <span class="wc-hero-brand">
+          <span class="brand-icon" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;">🏥</span>
+          Well Clinic Central
+        </span>
+        <button class="btn-logout" id="btnLogout">Sair ↗</button>
+      </div>
+      <div class="wc-hero-title" id="heroTitle">Olá!</div>
+      <div class="wc-hero-subtitle" id="heroSubtitle"></div>
+    </div>
+
+    <div class="wc-container">
+      <div class="hub-date" id="hubDate"></div>
+      <div class="hub-section-title">Módulos</div>
+      <div class="module-grid" id="moduleGrid"></div>
+
+      <div class="hub-footer">
+        <div>Well Clinic Central v2.0</div>
+        <div class="wc-mt-8">Desenvolvido por <a href="#">Jonatã Schneider</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts compartilhados -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // ════════════════════════════════════════
+    // PORTAL HUB — Lógica da página
+    // ════════════════════════════════════════
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      WC.api.init();
+      WC.ui.bindAuthEvents();
+
+      const result = await WC.auth.init();
+      if (!result.authenticated) return;
+
+      // Mostrar app
+      document.getElementById('appContent').classList.remove('wc-hidden');
+      renderHub();
+    });
+
+    function renderHub() {
+      const user = WC.auth.getUser();
+      const displayName = WC.auth.getDisplayName();
+
+      // Hero
+      document.getElementById('heroTitle').textContent = `Olá, ${displayName}!`;
+      document.getElementById('heroSubtitle').textContent = `${user.cargo} • ${user.equipe}`;
+
+      // Data
+      document.getElementById('hubDate').textContent = WC.ui.capitalize(WC.ui.formatDate());
+
+      // Módulos
+      const grid = document.getElementById('moduleGrid');
+      grid.innerHTML = '';
+
+      Object.entries(WC.config.MODULES).forEach(([key, mod], i) => {
+        // Verificar acesso por perfil
+        if (mod.perfil && !WC.auth.hasProfile(mod.perfil)) return;
+
+        const card = document.createElement('a');
+        card.href = mod.page;
+        card.className = 'module-link';
+        card.innerHTML = `
+          <div class="wc-card wc-card--interactive wc-animate-in" style="animation-delay:${i * 0.05}s">
+            <div class="module-card">
+              <div class="wc-card__icon wc-card__icon--${mod.color}">${mod.icon}</div>
+              <div>
+                <div class="wc-card__title">${mod.title}</div>
+              </div>
+              <span class="module-arrow">›</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Logout
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        WC.auth.logout();
+      });
+    }
+  </script>
+</body>
+</html>

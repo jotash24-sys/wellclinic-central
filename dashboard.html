@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Well Clinic</title>
+  <link rel="stylesheet" href="css/wellclinic.css">
+  <style>
+    /* Dashboard-specific overrides */
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      border: 1px solid var(--cinza-leve);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--sombra-sm);
+      transition: var(--transition);
+      animation: wc-fadeUp 0.4s ease both;
+    }
+
+    .kpi-card:hover {
+      box-shadow: var(--sombra-md);
+      transform: translateY(-2px);
+    }
+
+    .kpi-value {
+      font-family: var(--font-titulo);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--azul);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--cinza-texto);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .kpi-card.status-success .kpi-value { color: var(--verde); }
+    .kpi-card.status-warning .kpi-value { color: var(--dourado); }
+    .kpi-card.status-danger .kpi-value { color: var(--vermelho); }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 14px;
+    }
+
+    .section-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: var(--font-titulo);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--azul);
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--cinza-texto);
+    }
+
+    .content-card {
+      background: var(--branco);
+      border-radius: var(--radius);
+      border: 1px solid var(--cinza-leve);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--sombra-sm);
+      animation: wc-fadeUp 0.4s ease both;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .cylinder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .cylinder-item {
+      background: var(--branco);
+      border: 1px solid var(--cinza-leve);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+
+    .cylinder-item:hover {
+      box-shadow: var(--sombra-md);
+      border-color: var(--dourado-claro);
+    }
+
+    .cylinder-status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .cylinder-status-dot.full {
+      background: var(--verde);
+      box-shadow: 0 0 8px rgba(74,158,142,0.3);
+    }
+
+    .cylinder-status-dot.empty {
+      background: var(--vermelho);
+      box-shadow: 0 0 8px rgba(212,100,74,0.3);
+    }
+
+    .cylinder-info {
+      flex: 1;
+    }
+
+    .cylinder-id {
+      font-weight: 600;
+      color: var(--azul);
+      font-size: 12px;
+    }
+
+    .cylinder-details {
+      font-size: 11px;
+      color: var(--cinza-texto);
+      margin-top: 2px;
+    }
+
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--cinza-leve);
+    }
+
+    .bar-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .bar-label {
+      width: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 24px;
+      background: var(--marfim-warm);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--branco);
+      transition: width 0.6s ease;
+      min-width: 30px;
+    }
+
+    .bar-fill.verde { background: linear-gradient(90deg, var(--verde), var(--verde-claro)); }
+    .bar-fill.azul { background: linear-gradient(90deg, var(--azul), var(--azul-soft)); }
+    .bar-fill.dourado { background: linear-gradient(90deg, #8B6914, var(--dourado)); }
+    .bar-fill.terra { background: linear-gradient(90deg, var(--terra), #D4765E); }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--cinza-leve);
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--grafite);
+    }
+
+    .metric-value {
+      font-family: var(--font-titulo);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+
+    .metric-value.secondary {
+      font-size: 12px;
+      font-family: var(--font-corpo);
+      font-weight: 400;
+      color: var(--cinza-texto);
+    }
+
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--cinza-leve);
+      border-top-color: var(--verde);
+      border-radius: 50%;
+      animation: wc-spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--cinza-texto);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 14px;
+    }
+
+    .alert-box {
+      background: var(--vermelho-bg);
+      border: 1px solid rgba(212,100,74,0.2);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .alert-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .alert-content {
+      flex: 1;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      color: var(--vermelho);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .alert-text {
+      font-size: 12px;
+      color: var(--cinza-texto);
+    }
+
+    .footer-divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+      margin: 32px auto 12px;
+    }
+
+    .footer-brand {
+      font-family: var(--font-titulo);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dourado);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .footer-credit {
+      font-size: 9px;
+      color: rgba(45,45,58,0.25);
+      text-align: center;
+    }
+
+    .permission-denied {
+      background: var(--vermelho-bg);
+      border: 1px solid rgba(212,100,74,0.2);
+      border-radius: var(--radius);
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .permission-denied h2 {
+      font-family: var(--font-titulo);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--vermelho);
+      margin-bottom: 8px;
+    }
+
+    .permission-denied p {
+      font-size: 14px;
+      color: var(--cinza-texto);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .permission-denied a {
+      color: var(--verde);
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading overlay -->
+  <div class="wc-loading" id="wcLoading">
+    <div class="wc-loading__spinner"></div>
+    <div class="wc-loading__text">Carregando dashboard...</div>
+  </div>
+
+  <!-- Main content -->
+  <div id="dashboard-content"></div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // ════════════════════════════════════════════════════════════════
+    // Dashboard — Direção
+    // ════════════════════════════════════════════════════════════════
+
+    const DASHBOARD_API_KEY = 'wellclinic2026admin';
+    const REFRESH_INTERVAL = 60000; // 60 segundos
+    let refreshTimer = null;
+
+    async function initDashboard() {
+      try {
+        // 1. Verificar autenticação
+        const result = await WC.auth.init();
+
+        if (!result.authenticated) {
+          renderPermissionDenied('Você precisa fazer login para acessar o dashboard.');
+          return;
+        }
+
+        // 2. Verificar perfil 'gestor'
+        const user = WC.auth.getUser();
+        if (!user || user.perfil !== 'gestor') {
+          renderPermissionDenied('O dashboard é exclusivo para gestores.');
+          return;
+        }
+
+        // 3. Carregar e renderizar dados
+        WC.ui.showLoading();
+        await loadAndRender();
+
+        // 4. Configurar auto-refresh
+        setupAutoRefresh();
+
+      } catch (e) {
+        console.error('Erro ao inicializar dashboard:', e);
+        renderError('Erro ao inicializar: ' + e.message);
+      }
+    }
+
+    async function loadAndRender() {
+      try {
+        // Buscar dados dos cilindros
+        const dashboardData = await WC.api.get(WC.config.API_GASES, {
+          action: 'dashboard',
+          key: DASHBOARD_API_KEY
+        });
+
+        // Buscar lista de usuários
+        const usersData = await WC.api.get(WC.config.API_GASES, {
+          action: 'listar_usuarios',
+          key: DASHBOARD_API_KEY
+        });
+
+        renderDashboard(dashboardData, usersData);
+        WC.ui.hideLoading();
+
+      } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        renderError('Erro ao carregar dados: ' + e.message);
+      }
+    }
+
+    function renderDashboard(data, usersData) {
+      const container = document.getElementById('dashboard-content');
+
+      // Processar dados
+      const estoque = data.estoque || [];
+      const valvulas = data.valvulas || {};
+      const movimentacoes = data.movimentacoes || { total: 0, porGas: {}, porLocal: {}, porCilindro: {}, ultimosRegistros: [] };
+      const custos = data.custos || { totalNFs: 0, custoTotal: 0, custoPorGas: {}, nfs: [] };
+      const usuarios = Array.isArray(usersData) ? usersData : (usersData.usuarios || []);
+
+      // Calcular métricas
+      const cilindrosVazios = estoque.filter(c => c.status !== 'Cheio').length;
+      const cilindrosCheios = estoque.filter(c => c.status === 'Cheio').length;
+      const diasSemFechamento = valvulas.diasSemFechamento || [];
+      const diasAlert = diasSemFechamento.length > 0;
+
+      // Montar HTML
+      let html = renderHero();
+
+      html += `<div class="dashboard-container">`;
+
+      // KPIs
+      html += `<div class="dashboard-grid">`;
+      html += renderKPI(movimentacoes.total || 0, 'Movimentações', '');
+      html += renderKPI(cilindrosCheios, 'Cilindros Cheios', cilindrosCheios > 0 ? 'success' : '');
+      html += renderKPI(cilindrosVazios, 'Cilindros Vazios', cilindrosVazios > 0 ? 'danger' : '');
+      html += renderKPI(diasAlert ? diasSemFechamento.length : 0, 'Sem Fechamento', diasAlert ? 'warning' : 'success');
+      html += renderKPI(custos.totalNFs || 0, 'Notas Fiscais', '');
+      html += renderKPI('R$' + (custos.custoTotal || 0).toFixed(0), 'Custo Total', '');
+      html += `</div>`;
+
+      // Alerta de válvulas
+      if (diasAlert) {
+        html += `<div class="alert-box">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <div class="alert-title">${diasSemFechamento.length} dia(s) sem fechamento</div>
+            <div class="alert-text">${diasSemFechamento.join(', ')}</div>
+          </div>
+        </div>`;
+      }
+
+      // Status dos Cilindros
+      html += `<div class="section-header">
+        <div class="section-icon" style="background: rgba(74,158,142,0.08); color: var(--verde);">📊</div>
+        <div>
+          <div class="section-title">Status dos Cilindros</div>
+          <div class="section-subtitle">Visão em tempo real — 12 unidades</div>
+        </div>
+      </div>`;
+
+      if (estoque.length > 0) {
+        html += `<div class="content-card"><div class="cylinder-grid">`;
+        estoque.forEach(cilindro => {
+          const isFull = cilindro.status === 'Cheio';
+          html += `<div class="cylinder-item">
+            <div class="cylinder-status-dot ${isFull ? 'full' : 'empty'}"></div>
+            <div class="cylinder-info">
+              <div class="cylinder-id">${cilindro.id}</div>
+              <div class="cylinder-details">${cilindro.tipo}<br>${cilindro.capacidade}<br>${cilindro.local || 'Sem local'}</div>
+            </div>
+          </div>`;
+        });
+        html += `</div></div>`;
+      } else {
+        html += renderEmpty('Nenhum cilindro registrado');
+      }
+
+      // Controle de Válvulas
+      html += `<div class="section-header">
+        <div class="section-icon" style="background: rgba(160,137,108,0.08); color: var(--dourado);">🔒</div>
+        <div>
+          <div class="section-title">Controle de Válvulas</div>
+          <div class="section-subtitle">Abertura e fechamento diário</div>
+        </div>
+      </div>`;
+
+      if (valvulas.resumoDiario && valvulas.resumoDiario.length > 0) {
+        html += `<div class="content-card">
+          <div class="wc-table-wrap">
+            <table class="wc-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Abriu</th>
+                  <th>Fechou</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        valvulas.resumoDiario.slice(0, 15).forEach(diario => {
+          const completo = diario.abertura && diario.fechamento;
+          html += `<tr>
+            <td style="font-weight: 600;">${diario.data}</td>
+            <td>${diario.abertura || '—'}</td>
+            <td>${diario.fechamento || '—'}</td>
+            <td><span class="wc-pill wc-pill--${completo ? 'ativo' : 'pendente'}">${completo ? '✅ Completo' : '⚠️ Incompleto'}</span></td>
+          </tr>`;
+        });
+
+        html += `</tbody></table></div></div>`;
+      } else {
+        html += renderEmpty('Nenhum registro de válvulas');
+      }
+
+      // Movimentações
+      html += `<div class="section-header">
+        <div class="section-icon" style="background: rgba(74,158,142,0.08); color: var(--verde);">🔄</div>
+        <div>
+          <div class="section-title">Movimentações</div>
+          <div class="section-subtitle">Frequência, consumo e previsão</div>
+        </div>
+      </div>`;
+
+      if (movimentacoes.total > 0) {
+        // Gráficos de movimento
+        html += `<div class="two-column">`;
+
+        // Por Tipo de Gás
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">Por Tipo de Gás</div>`;
+        const maxGas = Math.max(...Object.values(movimentacoes.porGas || {})) || 1;
+        Object.entries(movimentacoes.porGas || {}).forEach(([gas, qty]) => {
+          const color = gas.includes('Nitroso') ? 'azul' : 'verde';
+          html += renderBar(gas, qty, maxGas, color);
+        });
+        html += `</div>`;
+
+        // Por Localização
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">Por Localização</div>`;
+        const maxLocal = Math.max(...Object.values(movimentacoes.porLocal || {})) || 1;
+        const colorScheme = ['verde', 'azul', 'dourado', 'terra'];
+        let colorIdx = 0;
+        Object.entries(movimentacoes.porLocal || {}).forEach(([local, qty]) => {
+          html += renderBar(local, qty, maxLocal, colorScheme[colorIdx++ % 4]);
+        });
+        html += `</div>`;
+
+        html += `</div>`;
+
+        // Frequência por Cilindro
+        const maxCil = Math.max(...Object.values(movimentacoes.porCilindro || {})) || 1;
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">Frequência por Cilindro</div>`;
+        Object.entries(movimentacoes.porCilindro || {})
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([cil, qty]) => {
+            const color = cil.includes('Nitroso') ? 'azul' : 'verde';
+            html += renderBar(cil, qty, maxCil, color);
+          });
+        html += `</div>`;
+
+        // Dias médios entre trocas
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">📅 Dias Médios entre Trocas</div>`;
+        Object.entries(movimentacoes.mediaEntreTrocas || {}).sort().forEach(([cil, dias]) => {
+          html += `<div class="metric-row">
+            <div class="metric-label">${cil}</div>
+            <div class="metric-value ${dias === null ? 'secondary' : ''}">${dias !== null ? dias + ' dias' : 'Dados insuficientes'}</div>
+          </div>`;
+        });
+        html += `</div>`;
+
+        // Últimas movimentações
+        if (movimentacoes.ultimosRegistros && movimentacoes.ultimosRegistros.length > 0) {
+          html += `<div class="section-header" style="margin-top: 16px;">
+            <div class="section-icon" style="background: rgba(74,158,142,0.08); color: var(--verde);">📋</div>
+            <div>
+              <div class="section-title">Últimas Movimentações</div>
+              <div class="section-subtitle">Últimos 10 registros</div>
+            </div>
+          </div>`;
+
+          html += `<div class="content-card">
+            <div class="wc-table-wrap">
+              <table class="wc-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Operador</th>
+                    <th>Ação</th>
+                    <th>Cilindro</th>
+                    <th>Local</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+          movimentacoes.ultimosRegistros.slice(0, 10).forEach(reg => {
+            const isRetirada = reg.acao && reg.acao.includes('Retirada');
+            html += `<tr>
+              <td style="font-size: 12px;">${reg.dataHora}</td>
+              <td>${reg.operador}</td>
+              <td><span class="wc-pill wc-pill--${isRetirada ? 'pendente' : 'ativo'}">${isRetirada ? '🔴 Retirada' : '🟢 ' + reg.acao}</span></td>
+              <td style="font-weight: 600;">${reg.cilindro}</td>
+              <td>${reg.local}</td>
+            </tr>`;
+          });
+
+          html += `</tbody></table></div></div>`;
+        }
+
+      } else {
+        html += renderEmpty('Nenhuma movimentação registrada');
+      }
+
+      // Custos
+      html += `<div class="section-header">
+        <div class="section-icon" style="background: rgba(160,137,108,0.08); color: var(--dourado);">💰</div>
+        <div>
+          <div class="section-title">Controle de Custos</div>
+          <div class="section-subtitle">Custo por unidade e histórico de NFs</div>
+        </div>
+      </div>`;
+
+      if (custos.totalNFs > 0) {
+        html += `<div class="two-column">`;
+
+        // Custo por Tipo
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">Custo por Unidade de Gás</div>`;
+        Object.entries(custos.custoPorGas || {}).forEach(([gas, valor]) => {
+          html += `<div class="metric-row">
+            <div class="metric-label">${gas}</div>
+            <div class="metric-value">R$ ${valor.toFixed(2)}</div>
+          </div>`;
+        });
+        html += `</div>`;
+
+        // Resumo Financeiro
+        html += `<div class="content-card">
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 14px; color: var(--azul);">Resumo Financeiro</div>
+          <div class="metric-row">
+            <div class="metric-label">Total de NFs</div>
+            <div class="metric-value">${custos.totalNFs}</div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-label">Custo Total</div>
+            <div class="metric-value">R$ ${(custos.custoTotal || 0).toFixed(2)}</div>
+          </div>
+        </div>`;
+
+        html += `</div>`;
+
+        // Histórico de NFs
+        if (custos.nfs && custos.nfs.length > 0) {
+          html += `<div class="content-card">
+            <div class="wc-table-wrap">
+              <table class="wc-table">
+                <thead>
+                  <tr>
+                    <th>NF</th>
+                    <th>Fornecedor</th>
+                    <th>Itens</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+          custos.nfs.forEach(nf => {
+            html += `<tr>
+              <td style="font-weight: 600;">${nf.numero}</td>
+              <td>${nf.fornecedor}</td>
+              <td>${nf.itens}</td>
+              <td style="font-weight: 600;">R$ ${nf.total.toFixed(2)}</td>
+            </tr>`;
+          });
+
+          html += `</tbody></table></div></div>`;
+        }
+
+      } else {
+        html += renderEmpty('Nenhuma NF registrada. Use o sistema para vincular notas fiscais.');
+      }
+
+      // Usuários
+      html += `<div class="section-header">
+        <div class="section-icon" style="background: rgba(15,31,58,0.08); color: var(--azul);">👥</div>
+        <div>
+          <div class="section-title">Usuários Registrados</div>
+          <div class="section-subtitle">Equipe e permissões</div>
+        </div>
+      </div>`;
+
+      if (usuarios.length > 0) {
+        html += `<div class="content-card">
+          <div class="wc-table-wrap">
+            <table class="wc-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>E-mail</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>`;
+
+        usuarios.forEach(user => {
+          const statusPill = user.ativo !== false ? 'wc-pill--ativo' : 'wc-pill--pendente';
+          const statusText = user.ativo !== false ? 'Ativo' : 'Inativo';
+          html += `<tr>
+            <td style="font-weight: 600;">${user.nome || user.apelido || 'Sem nome'}</td>
+            <td>${user.email}</td>
+            <td><span class="wc-pill wc-pill--${user.perfil === 'gestor' ? 'warning' : 'success'}">${user.perfil}</span></td>
+            <td><span class="wc-pill ${statusPill}">${statusText}</span></td>
+          </tr>`;
+        });
+
+        html += `</tbody></table></div></div>`;
+      } else {
+        html += renderEmpty('Nenhum usuário registrado');
+      }
+
+      // Footer
+      html += `<div class="footer-divider"></div>
+        <div class="footer-brand">Well Clinic</div>
+        <div class="footer-credit">Desenvolvido por Jonatã Schneider · Dashboard v2.0</div>
+      </div>`;
+
+      container.innerHTML = html;
+    }
+
+    function renderHero() {
+      return `<div class="wc-hero">
+        <div class="wc-hero-top">
+          <a href="${WC.config.BASE_URL}" class="wc-hero-brand">
+            <span class="brand-icon" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;">🏥</span>
+            Well Clinic Central
+          </a>
+          <a href="${WC.config.BASE_URL}" class="wc-hero-link">← Portal</a>
+        </div>
+        <div class="wc-hero-title">Dashboard — Direção</div>
+        <div class="wc-hero-subtitle">Controle centralizado de gases e operações</div>
+      </div>`;
+    }
+
+    function renderKPI(value, label, status) {
+      const statusClass = status ? ` status-${status}` : '';
+      return `<div class="kpi-card${statusClass}">
+        <div class="kpi-value">${value}</div>
+        <div class="kpi-label">${label}</div>
+      </div>`;
+    }
+
+    function renderBar(label, value, max, color) {
+      const pct = Math.max(15, (value / max) * 100);
+      return `<div class="bar-item">
+        <div class="bar-label">${label}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${color}" style="width: ${pct}%">${value}</div>
+        </div>
+      </div>`;
+    }
+
+    function renderEmpty(message) {
+      return `<div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-text">${message}</div>
+      </div>`;
+    }
+
+    function renderError(message) {
+      const container = document.getElementById('dashboard-content');
+      container.innerHTML = `<div class="dashboard-container" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">⚠️</div>
+        <h2 style="color: var(--vermelho); font-size: 18px; margin-bottom: 8px;">Erro ao carregar</h2>
+        <p style="color: var(--cinza-texto); margin-bottom: 24px;">${message}</p>
+        <a href="${WC.config.BASE_URL}" class="wc-btn wc-btn--secondary">Voltar ao Portal</a>
+      </div>`;
+      WC.ui.hideLoading();
+    }
+
+    function renderPermissionDenied(message) {
+      const container = document.getElementById('dashboard-content');
+      container.innerHTML = `<div class="dashboard-container">
+        ${renderHero()}
+        <div style="margin-top: 40px;">
+          <div class="permission-denied">
+            <h2>Acesso Restrito</h2>
+            <p>${message}</p>
+            <a href="${WC.config.BASE_URL}">← Voltar ao Portal</a>
+          </div>
+        </div>
+      </div>`;
+      WC.ui.hideLoading();
+    }
+
+    function setupAutoRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(() => {
+        loadAndRender();
+      }, REFRESH_INTERVAL);
+    }
+
+    // Inicializar ao carregar
+    window.addEventListener('load', initDashboard);
+  </script>
+</body>
+</html>
