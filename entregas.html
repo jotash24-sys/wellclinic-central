@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Well Clinic — Entregas</title>
+<link rel="stylesheet" href="css/wellclinic.css">
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<style>
+/* PAGE-SPECIFIC CSS FOR ENTREGAS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeUp .5s ease-out both}.delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
+
+/* Home */
+.home-greeting{text-align:center;margin-bottom:24px;animation:fadeUp .5s ease-out}
+.home-greeting h2{font-family:var(--font-titulo);font-size:22px;font-weight:600;color:var(--azul);margin-bottom:4px}
+.home-greeting p{font-size:13px;color:var(--cinza-texto)}
+.home-menu{display:flex;flex-direction:column;gap:14px}
+.menu-btn{background:var(--branco);border-radius:var(--radius);box-shadow:var(--sombra-md);border:1px solid var(--cinza-leve);cursor:pointer;display:flex;align-items:stretch;transition:all .3s;overflow:hidden;text-align:left}
+.menu-btn:active{transform:scale(.98)}
+.menu-stripe{width:5px;flex-shrink:0}
+.menu-receber .menu-stripe{background:linear-gradient(180deg,var(--verde),var(--verde-claro))}
+.menu-enviar .menu-stripe{background:linear-gradient(180deg,var(--dourado),var(--dourado-claro))}
+.menu-historico .menu-stripe{background:linear-gradient(180deg,var(--azul),var(--azul-medio))}
+.menu-pendentes .menu-stripe{background:linear-gradient(180deg,var(--terra),#D4765E)}
+.menu-content{padding:20px 18px;display:flex;align-items:center;gap:16px;flex:1}
+.menu-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.menu-receber .menu-icon{background:var(--verde-bg)}
+.menu-enviar .menu-icon{background:var(--dourado-bg)}
+.menu-historico .menu-icon{background:rgba(15,31,58,.06)}
+.menu-pendentes .menu-icon{background:var(--terra-bg)}
+.menu-text{flex:1}.menu-text h3{font-family:var(--font-titulo);font-size:16px;font-weight:600;color:var(--azul);margin-bottom:3px}.menu-text p{font-size:12px;color:var(--cinza-texto);line-height:1.4}
+.menu-arrow{color:var(--dourado);font-size:18px;padding-right:16px;display:flex;align-items:center;opacity:.4}
+
+/* Badge de pendências */
+.badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;background:var(--terra);color:#fff;font-size:11px;font-weight:700;border-radius:11px;padding:0 6px;margin-left:8px}
+
+/* Cards */
+.card{background:var(--branco);border-radius:var(--radius);box-shadow:var(--sombra-sm);border:1px solid var(--cinza-leve);padding:22px 18px;margin-bottom:14px}
+.card-title{font-family:var(--font-titulo);font-size:13px;font-weight:600;color:var(--azul);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.card-title .step{width:24px;height:24px;background:linear-gradient(135deg,var(--azul),var(--azul-medio));color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-corpo);font-size:11px;font-weight:600;flex-shrink:0}
+
+/* Fields */
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:500;color:var(--cinza-texto);margin-bottom:8px;letter-spacing:.3px}
+input,select,textarea{width:100%;padding:15px 14px;font-family:var(--font-corpo);font-size:15px;border:2px solid var(--cinza-leve);border-radius:var(--radius-sm);background:var(--marfim);color:var(--grafite);transition:all .3s;-webkit-appearance:none;box-sizing:border-box}
+input::placeholder,textarea::placeholder{color:rgba(45,45,58,.3)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--dourado);background:#fff;box-shadow:0 0 0 3px rgba(160,137,108,.12)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A5A6E' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+textarea{resize:vertical;min-height:60px;font-size:14px}
+
+/* Categoria buttons */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cat-btn{padding:16px 10px;border:2px solid var(--cinza-leve);border-radius:var(--radius-sm);background:#fff;font-family:var(--font-corpo);font-size:13px;font-weight:500;color:var(--grafite);cursor:pointer;text-align:center;transition:all .25s}
+.cat-btn:active{transform:scale(.97)}.cat-btn .cat-icon{display:block;font-size:24px;margin-bottom:6px}
+.cat-btn.selected{border-color:var(--verde);background:var(--verde-bg);color:var(--verde)}
+.cat-btn-full{grid-column:span 2}
+
+/* Photo */
+.photo-area{border:2px dashed var(--cinza-leve);border-radius:var(--radius-sm);padding:32px 20px;text-align:center;background:var(--marfim);cursor:pointer;transition:all .3s}
+.photo-area:hover{border-color:var(--dourado-claro);background:var(--dourado-bg)}
+.photo-area .cam-icon{font-size:32px;margin-bottom:8px}
+.photo-area p{font-size:13px;color:var(--cinza-texto)}
+.photo-input{display:none}
+.photo-preview{width:100%;border-radius:var(--radius-sm);margin-bottom:12px}
+.photo-actions{display:none;gap:8px;margin-bottom:12px}
+.photo-actions button{flex:1;padding:10px 14px;background:var(--terra);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all .3s}
+.photo-actions button:active{transform:scale(.95)}
+
+/* Submit button */
+.submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--verde),var(--verde-claro));color:#fff;font-family:var(--font-corpo);font-size:15px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;margin:24px 0 12px}
+.submit-btn:active:not(:disabled){transform:scale(.98)}
+.submit-btn:disabled{background:var(--cinza-leve);color:var(--cinza-texto);cursor:not-allowed}
+.submit-btn.envio-btn{background:linear-gradient(135deg,var(--dourado),var(--dourado-claro))}
+.spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:wc-spin .6s linear infinite;display:none}
+.spinner.show{display:block}
+.error-msg{background:var(--terra-bg);color:var(--terra);font-size:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid rgba(184,92,74,.2);display:none}
+.error-msg.show{display:block}
+
+/* Modals */
+.feedback{position:fixed;bottom:0;left:0;right:0;top:0;background:rgba(15,31,58,.5);display:none;align-items:center;justify-content:center;z-index:9000}
+.feedback.show{display:flex}
+.feedback-box{background:#fff;border-radius:var(--radius);padding:32px 24px;width:90%;max-width:380px;box-shadow:var(--sombra-forte);animation:wc-slideUp .3s ease}
+.feedback-box h3{font-family:var(--font-titulo);font-size:18px;font-weight:600;color:var(--azul);margin-bottom:12px;text-align:center}
+.feedback-box p{font-size:13px;color:var(--cinza-texto);text-align:center;line-height:1.6;margin-bottom:20px}
+.feedback-box .check{font-size:48px;text-align:center;margin-bottom:12px}
+.confirm-summary{font-size:12px;color:var(--grafite);margin-bottom:24px;max-height:200px;overflow-y:auto}
+.confirm-summary .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--cinza-leve)}
+.confirm-summary .row:last-child{border-bottom:none}
+.confirm-summary .label{font-weight:600;color:var(--azul);flex:0 0 auto}
+.confirm-summary .value{text-align:right;flex:1}
+.modal-actions{display:flex;flex-direction:column;gap:10px}
+.modal-actions button{padding:14px;border:none;border-radius:var(--radius-sm);font-family:var(--font-corpo);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.modal-actions button:first-child{background:var(--verde);color:#fff}
+.modal-actions button:first-child:active{transform:scale(.98)}
+.btn-secondary{background:var(--cinza-leve)!important;color:var(--grafite)!important}
+.btn-secondary:active{transform:scale(.98)}
+
+/* Pendentes list */
+.entrega-card{background:var(--branco);border-radius:var(--radius-sm);box-shadow:var(--sombra-sm);border:1px solid var(--cinza-leve);padding:16px;margin-bottom:12px;cursor:pointer;transition:all .25s}
+.entrega-card:active{transform:scale(.98)}
+.entrega-card.recebimento{border-left:4px solid var(--verde)}
+.entrega-card.envio{border-left:4px solid var(--dourado)}
+.entrega-card.concluido{opacity:.6;border-left-color:var(--cinza-leve)}
+.entrega-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.entrega-cat{font-size:12px;font-weight:600;color:var(--azul);display:flex;align-items:center;gap:6px}
+.entrega-status{font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px}
+.entrega-status.pendente{background:var(--terra-bg);color:var(--terra)}
+.entrega-status.aguardando{background:var(--dourado-bg);color:var(--dourado)}
+.entrega-status.concluido{background:var(--verde-bg);color:var(--verde)}
+.entrega-desc{font-size:14px;color:var(--grafite);margin-bottom:6px;font-weight:500}
+.entrega-meta{font-size:11px;color:var(--cinza-texto);display:flex;flex-wrap:wrap;gap:12px}
+.entrega-empty{text-align:center;padding:40px 20px;color:var(--cinza-texto);font-size:14px}
+.entrega-empty .empty-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:16px;background:var(--cinza-leve);border-radius:var(--radius-sm);padding:3px}
+.tab-btn{flex:1;padding:10px;border:none;background:none;font-family:var(--font-corpo);font-size:13px;font-weight:600;color:var(--cinza-texto);cursor:pointer;border-radius:calc(var(--radius-sm) - 2px);transition:all .25s;text-align:center}
+.tab-btn.active{background:var(--branco);color:var(--azul);box-shadow:var(--sombra-sm)}
+
+/* Screens */
+.screen{display:none}
+.screen.active{display:block}
+
+/* Footer */
+.footer{border-top:1px solid var(--cinza-leve);text-align:center;padding:24px 0;font-size:12px;color:var(--cinza-texto)}
+.footer-divider{height:1px;background:var(--cinza-leve);margin-bottom:12px}
+.footer-brand{font-family:var(--font-titulo);font-size:13px;font-weight:600;color:var(--azul);margin-bottom:4px}
+.footer-sub{font-size:11px;color:var(--cinza-texto);margin-bottom:8px}
+.footer-dev{font-size:10px;color:var(--cinza-texto);opacity:.7}
+
+/* Retirada modal extras */
+.retirada-info{background:var(--marfim);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;border:1px solid var(--cinza-leve)}
+.retirada-info .ri-label{font-size:11px;color:var(--cinza-texto);margin-bottom:2px}
+.retirada-info .ri-value{font-size:14px;color:var(--grafite);font-weight:500;margin-bottom:10px}
+.retirada-info .ri-value:last-child{margin-bottom:0}
+
+/* Notification badge (in-app) */
+.notif-dot{width:8px;height:8px;background:var(--terra);border-radius:50%;display:inline-block;margin-left:4px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<!-- Auth Overlays -->
+<div id="wcLoading" class="wc-loading"><div class="wc-loading__spinner"></div><div class="wc-loading__text">Carregando...</div></div>
+<div id="wcLogin" class="wc-login"><div class="wc-login__box"><div style="font-size:32px;margin-bottom:12px;">🏥</div><div class="wc-login__title">Well Clinic</div><div class="wc-login__subtitle">Controle de Entregas</div><div class="wc-form-group"><input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email"></div><div class="wc-form-group"><input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric" maxlength="4"></div><button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button><div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div><div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div></div></div>
+<div id="wcRegister" class="wc-register"><div class="wc-login__box"><div style="font-size:32px;margin-bottom:12px;">👋</div><div class="wc-login__title">Bem-vindo!</div><div class="wc-login__subtitle" id="registerSubtitle">Configure seu acesso</div><div class="wc-form-group"><label class="wc-label">Como quer ser chamado?</label><input type="text" id="registerApelido" class="wc-input" placeholder="Ex: Jonatã, Dra. Jaque, Gabi..."></div><div class="wc-form-group"><label class="wc-label">Crie uma senha (4+ dígitos)</label><input type="password" id="registerPin" class="wc-input" placeholder="Sua senha" inputmode="numeric"></div><div class="wc-form-group"><label class="wc-label">Confirme a senha</label><input type="password" id="registerPinConfirm" class="wc-input" placeholder="Repita a senha" inputmode="numeric"></div><button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnRegister">Criar Acesso</button><div id="registerError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div></div></div>
+
+<!-- HEADER -->
+<div style="background:linear-gradient(135deg,var(--azul),var(--azul-medio));color:#fff;position:sticky;top:0;z-index:100;overflow:hidden;padding:20px;">
+  <div style="position:relative;">
+    <button class="wc-btn wc-btn--outline" id="backBtn" onclick="goHome()" style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:40px;height:40px;padding:0;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:18px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.08);cursor:pointer;transition:all .3s;">←</button>
+    <a class="wc-hero-link" id="portalLink" href="index.html" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;">← Portal</a>
+    <button id="logoutBtn" onclick="handleLogout()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);color:#fff;padding:8px 12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;font-size:11px;font-weight:500;cursor:pointer;transition:all .3s;display:none;">Sair</button>
+    <div style="text-align:center;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;">Well Clinic</div>
+      <h1 style="font-family:var(--font-titulo);font-size:17px;font-weight:600;letter-spacing:.5px;margin:0;">Controle de Entregas</h1>
+      <div style="width:32px;height:2px;background:linear-gradient(90deg,transparent,var(--dourado-claro),transparent);margin:6px auto 4px;"></div>
+      <div style="font-size:11px;font-weight:300;opacity:.6;letter-spacing:1px;">Recebimentos e Envios</div>
+      <div style="font-size:12px;margin-top:8px;opacity:.8;" id="headerUser"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wc-container">
+
+<!-- ═══ HOME ═══ -->
+<div class="screen active" id="screenHome">
+  <div class="home-greeting">
+    <h2>Controle de Entregas</h2>
+    <p>Selecione a operação desejada</p>
+  </div>
+  <div class="home-menu">
+    <div class="menu-btn menu-receber animate-in delay-1" onclick="startRecebimento()">
+      <div class="menu-stripe"></div>
+      <div class="menu-content">
+        <div class="menu-icon">📥</div>
+        <div class="menu-text">
+          <h3>Registrar Recebimento</h3>
+          <p>Delivery, Correios, materiais ou documentos que chegaram na clínica.</p>
+        </div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-btn menu-enviar animate-in delay-2" onclick="startEnvio()">
+      <div class="menu-stripe"></div>
+      <div class="menu-content">
+        <div class="menu-icon">📤</div>
+        <div class="menu-text">
+          <h3>Registrar Envio</h3>
+          <p>Encomendas ou documentos aguardando retirada por portador externo.</p>
+        </div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-btn menu-pendentes animate-in delay-3" onclick="showScreen('pendentes')">
+      <div class="menu-stripe"></div>
+      <div class="menu-content">
+        <div class="menu-icon">⏳</div>
+        <div class="menu-text">
+          <h3>Pendentes <span class="badge-count" id="badgePendentes" style="display:none;">0</span></h3>
+          <p>Entregas aguardando retirada ou confirmação.</p>
+        </div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-btn menu-historico animate-in delay-4" id="menuHistorico" style="display:none;" onclick="showScreen('historico')">
+      <div class="menu-stripe"></div>
+      <div class="menu-content">
+        <div class="menu-icon">📋</div>
+        <div class="menu-text">
+          <h3>Histórico Completo</h3>
+          <p>Todas as entregas registradas (gestão).</p>
+        </div>
+      </div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- Minhas entregas pendentes (in-app notification) -->
+  <div id="minhasEntregas" style="display:none;margin-top:24px;">
+    <div style="font-family:var(--font-titulo);font-size:14px;font-weight:600;color:var(--azul);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      📬 Suas entregas pendentes <span class="notif-dot"></span>
+    </div>
+    <div id="minhasEntregasList"></div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-brand">Well Clinic</div>
+    <div class="footer-sub">Entregas · Recebimentos · Envios</div>
+    <div class="footer-dev">Desenvolvido por Jonatã Schneider</div>
+  </div>
+</div>
+
+<!-- ═══ RECEBIMENTO ═══ -->
+<div class="screen" id="screenRecebimento">
+  <div style="background:linear-gradient(135deg,var(--verde),var(--verde-claro));border-radius:var(--radius);box-shadow:var(--sombra-forte);padding:28px 20px;margin-bottom:16px;text-align:center;color:#fff;" class="animate-in">
+    <div style="font-size:38px;margin-bottom:10px;">📥</div>
+    <h2 style="font-family:var(--font-titulo);font-size:22px;font-weight:600;">Registrar Recebimento</h2>
+    <p style="font-size:13px;opacity:.7;margin-top:4px;">Algo chegou na clínica? Registre aqui</p>
+  </div>
+
+  <div class="wc-user-badge animate-in delay-1">
+    <span class="wc-user-badge__avatar">👤</span>
+    <span class="wc-user-badge__name" id="recUserBadge">—</span>
+    <span class="wc-user-badge__role">Operador</span>
+  </div>
+
+  <div class="card animate-in delay-1">
+    <div class="card-title"><span class="step">1</span> Categoria</div>
+    <label style="margin-bottom:12px;font-size:12px;">O que chegou?</label>
+    <div class="cat-grid">
+      <button type="button" class="cat-btn" data-cat="Delivery" onclick="selectCategoria(this)"><span class="cat-icon">🍔</span>Delivery</button>
+      <button type="button" class="cat-btn" data-cat="Correios/Transportadora" onclick="selectCategoria(this)"><span class="cat-icon">📬</span>Correios</button>
+      <button type="button" class="cat-btn" data-cat="Material Odontológico" onclick="selectCategoria(this)"><span class="cat-icon">🦷</span>Material</button>
+      <button type="button" class="cat-btn" data-cat="Documento" onclick="selectCategoria(this)"><span class="cat-icon">📋</span>Documento</button>
+      <button type="button" class="cat-btn cat-btn-full" data-cat="Outros" onclick="selectCategoria(this)"><span class="cat-icon">📦</span>Outros</button>
+    </div>
+  </div>
+
+  <div class="card animate-in delay-2">
+    <div class="card-title"><span class="step">2</span> Detalhes</div>
+    <div class="field">
+      <label>Descrição da entrega</label>
+      <input type="text" id="recDescricao" placeholder="Ex: iFood almoço, caixa White Martins..." class="wc-input" oninput="checkRecReady()">
+    </div>
+    <div class="field">
+      <label>Remetente / De quem veio <span style="color:var(--cinza-texto);font-weight:300;">(opcional)</span></label>
+      <input type="text" id="recRemetente" placeholder="Ex: iFood, Correios, White Martins..." class="wc-input">
+    </div>
+  </div>
+
+  <div class="card animate-in delay-3">
+    <div class="card-title"><span class="step">3</span> Para quem é?</div>
+    <div class="field">
+      <label>Destinatário</label>
+      <select id="recDestinatario" class="wc-select" onchange="checkRecReady()">
+        <option value="">Selecione o colaborador...</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card animate-in delay-4">
+    <div class="card-title"><span class="step">4</span> Foto <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(recomendado)</span></div>
+    <div class="photo-area" id="recPhotoArea" onclick="document.getElementById('recPhotoInput').click()">
+      <div class="cam-icon">📸</div>
+      <p>Toque para fotografar a entrega</p>
+    </div>
+    <input type="file" accept="image/*" capture="environment" class="photo-input" id="recPhotoInput" onchange="handleRecPhoto(this)">
+    <img class="photo-preview" id="recPhotoPreview" style="display:none;">
+    <div class="photo-actions" id="recPhotoActions">
+      <button onclick="clearRecPhoto()">Remover foto</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="step">5</span> Observação <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(opcional)</span></div>
+    <div class="field">
+      <input type="text" id="recObs" placeholder="Ex: entrega frágil, manter refrigerado..." class="wc-input">
+    </div>
+  </div>
+
+  <button class="submit-btn" id="recSubmitBtn" onclick="confirmRecebimento()" disabled>
+    <span class="spinner" id="recSpinner"></span>
+    <span id="recSubmitText">Registrar Recebimento</span>
+  </button>
+  <div class="error-msg" id="recErrorMsg"></div>
+
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-brand">Well Clinic</div>
+    <div class="footer-dev">Desenvolvido por Jonatã Schneider</div>
+  </div>
+</div>
+
+<!-- ═══ ENVIO ═══ -->
+<div class="screen" id="screenEnvio">
+  <div style="background:linear-gradient(135deg,var(--dourado),var(--dourado-claro));border-radius:var(--radius);box-shadow:var(--sombra-forte);padding:28px 20px;margin-bottom:16px;text-align:center;color:#fff;" class="animate-in">
+    <div style="font-size:38px;margin-bottom:10px;">📤</div>
+    <h2 style="font-family:var(--font-titulo);font-size:22px;font-weight:600;">Registrar Envio</h2>
+    <p style="font-size:13px;opacity:.7;margin-top:4px;">Algo para ser retirado por portador externo</p>
+  </div>
+
+  <div class="wc-user-badge animate-in delay-1">
+    <span class="wc-user-badge__avatar">👤</span>
+    <span class="wc-user-badge__name" id="envUserBadge">—</span>
+    <span class="wc-user-badge__role">Responsável</span>
+  </div>
+
+  <div class="card animate-in delay-1">
+    <div class="card-title"><span class="step">1</span> O que está sendo enviado?</div>
+    <div class="field">
+      <label>Descrição</label>
+      <input type="text" id="envDescricao" placeholder="Ex: exame laboratorial, documentos..." class="wc-input" oninput="checkEnvReady()">
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="envCategoria" class="wc-select">
+        <option value="Documento">Documento</option>
+        <option value="Material Odontológico">Material Odontológico</option>
+        <option value="Correios/Transportadora">Correios/Transportadora</option>
+        <option value="Outros">Outros</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card animate-in delay-2">
+    <div class="card-title"><span class="step">2</span> Para quem vai?</div>
+    <div class="field">
+      <label>Destinatário externo</label>
+      <input type="text" id="envDestinatario" placeholder="Ex: Laboratório ABC, paciente João..." class="wc-input" oninput="checkEnvReady()">
+    </div>
+  </div>
+
+  <div class="card animate-in delay-3">
+    <div class="card-title"><span class="step">3</span> Quem vem buscar?</div>
+    <div class="field">
+      <label>Nome do portador</label>
+      <input type="text" id="envPortador" placeholder="Ex: motoboy do laboratório..." class="wc-input" oninput="checkEnvReady()">
+    </div>
+    <div class="field">
+      <label>Telefone do portador <span style="color:var(--cinza-texto);font-weight:300;">(opcional)</span></label>
+      <input type="tel" id="envTelefone" placeholder="(48) 99999-9999" class="wc-input">
+    </div>
+    <div class="field">
+      <label>Horário previsto de retirada</label>
+      <input type="time" id="envHorario" class="wc-input">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="step">4</span> Observação <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(opcional)</span></div>
+    <div class="field">
+      <input type="text" id="envObs" placeholder="Ex: entregar em mãos para Dr. Silva..." class="wc-input">
+    </div>
+  </div>
+
+  <button class="submit-btn envio-btn" id="envSubmitBtn" onclick="confirmEnvio()" disabled>
+    <span class="spinner" id="envSpinner"></span>
+    <span id="envSubmitText">Registrar Envio</span>
+  </button>
+  <div class="error-msg" id="envErrorMsg"></div>
+
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-brand">Well Clinic</div>
+    <div class="footer-dev">Desenvolvido por Jonatã Schneider</div>
+  </div>
+</div>
+
+<!-- ═══ PENDENTES ═══ -->
+<div class="screen" id="screenPendentes">
+  <div class="card animate-in">
+    <div class="card-title" style="margin-bottom:8px;">⏳ Entregas Pendentes</div>
+    <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:16px;">Toque em uma entrega para confirmar retirada</p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterPendentes('todos',this)">Todos</button>
+      <button class="tab-btn" onclick="filterPendentes('Recebimento',this)">Recebidos</button>
+      <button class="tab-btn" onclick="filterPendentes('Envio',this)">Envios</button>
+    </div>
+    <div id="pendentesList">
+      <div class="entrega-empty"><div class="empty-icon">📭</div>Nenhuma entrega pendente</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-brand">Well Clinic</div>
+    <div class="footer-dev">Desenvolvido por Jonatã Schneider</div>
+  </div>
+</div>
+
+<!-- ═══ HISTÓRICO (gestão) ═══ -->
+<div class="screen" id="screenHistorico">
+  <div class="card animate-in">
+    <div class="card-title" style="margin-bottom:8px;">📋 Histórico Completo</div>
+    <p style="font-size:12px;color:var(--cinza-texto);margin-bottom:16px;">Todas as entregas registradas</p>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterHistorico('todos',this)">Todos</button>
+      <button class="tab-btn" onclick="filterHistorico('Pendente',this)">Pendentes</button>
+      <button class="tab-btn" onclick="filterHistorico('Concluído',this)">Concluídos</button>
+    </div>
+    <div id="historicoList">
+      <div class="entrega-empty"><div class="empty-icon">📋</div>Carregando...</div>
+    </div>
+  </div>
+  <div class="footer">
+    <div class="footer-divider"></div>
+    <div class="footer-brand">Well Clinic</div>
+    <div class="footer-dev">Desenvolvido por Jonatã Schneider</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ═══ CONFIRM MODAL ═══ -->
+<div class="feedback" id="confirmModal">
+  <div class="feedback-box">
+    <h3 id="confirmTitle">Confirmar?</h3>
+    <div class="confirm-summary" id="confirmSummary"></div>
+    <div class="modal-actions">
+      <button id="confirmBtn" onclick="submitCurrent()">Confirmar e Registrar</button>
+      <button class="btn-secondary" onclick="closeConfirm()">Voltar e Corrigir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS MODAL ═══ -->
+<div class="feedback" id="successModal">
+  <div class="feedback-box">
+    <div class="check">✓</div>
+    <h3>Registro Concluído</h3>
+    <p id="successText"></p>
+    <div class="modal-actions">
+      <button onclick="goHome()">Voltar ao Início</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RETIRADA MODAL ═══ -->
+<div class="feedback" id="retiradaModal">
+  <div class="feedback-box" style="max-height:90vh;overflow-y:auto;">
+    <h3 id="retiradaTitle">Confirmar Retirada</h3>
+    <div class="retirada-info" id="retiradaInfo"></div>
+
+    <div class="field">
+      <label>Nome de quem está retirando</label>
+      <input type="text" id="retNome" placeholder="Nome completo" class="wc-input">
+    </div>
+    <div class="field" id="retTelefoneField" style="display:none;">
+      <label>Telefone de quem está retirando</label>
+      <input type="tel" id="retTelefone" placeholder="(48) 99999-9999" class="wc-input">
+    </div>
+
+    <div style="margin-top:12px;margin-bottom:16px;">
+      <label>Foto da retirada <span style="color:var(--cinza-texto);font-weight:300;">(opcional)</span></label>
+      <div class="photo-area" id="retPhotoArea" onclick="document.getElementById('retPhotoInput').click()" style="padding:16px 12px;">
+        <div class="cam-icon" style="font-size:24px;margin-bottom:4px;">📸</div>
+        <p style="font-size:12px;">Toque para fotografar</p>
+      </div>
+      <input type="file" accept="image/*" capture="environment" class="photo-input" id="retPhotoInput" onchange="handleRetPhoto(this)">
+      <img class="photo-preview" id="retPhotoPreview" style="display:none;max-height:150px;">
+      <div class="photo-actions" id="retPhotoActions">
+        <button onclick="clearRetPhoto()">Remover</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button onclick="submitRetirada()">Confirmar Retirada</button>
+      <button class="btn-secondary" onclick="closeRetirada()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let selectedCategoria = null;
+let recPhotoBase64 = null;
+let retPhotoBase64 = null;
+let pendingPayload = null;
+let currentPendingType = null; // 'recebimento' | 'envio'
+let allEntregas = [];
+let allUsuarios = [];
+let currentRetiradaId = null;
+let currentRetiradaTipo = null;
+let isGestor = false;
+let currentUser = null;
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+async function init() {
+  const authResult = await WC.auth.init();
+  if (authResult.registration) { WC.ui.bindAuthEvents(); return; }
+  if (!authResult.authenticated) { WC.ui.bindAuthEvents(() => window.location.reload()); return; }
+
+  const session = authResult.session;
+  currentUser = WC.auth.getUser();
+  isGestor = currentUser && currentUser.perfil === 'gestor';
+
+  showApp(session);
+  loadUsuarios();
+  loadPendentes();
+}
+
+function showApp(session) {
+  document.getElementById('wcLogin').classList.remove('show');
+  document.getElementById('wcRegister').classList.remove('show');
+  document.getElementById('logoutBtn').style.display = 'block';
+  document.getElementById('headerUser').textContent = 'Olá, ' + (session.nome || session.user?.nome || 'Usuário');
+
+  // Mostrar histórico só para gestores
+  if (isGestor) {
+    document.getElementById('menuHistorico').style.display = '';
+  }
+
+  showScreen('home');
+}
+
+function handleLogout() { WC.auth.logout(); }
+
+// ══════════════════════════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const map = {
+    home: 'screenHome',
+    recebimento: 'screenRecebimento',
+    envio: 'screenEnvio',
+    pendentes: 'screenPendentes',
+    historico: 'screenHistorico'
+  };
+  const id = map[name];
+  if (id) document.getElementById(id).classList.add('active');
+
+  document.getElementById('backBtn').style.display = name !== 'home' ? 'flex' : 'none';
+  document.getElementById('portalLink').style.display = name !== 'home' ? 'none' : 'block';
+  window.scrollTo(0, 0);
+
+  // Carregar dados quando entrar em pendentes ou histórico
+  if (name === 'pendentes') loadPendentes();
+  if (name === 'historico') loadHistorico();
+}
+
+function goHome() {
+  // Reset state
+  selectedCategoria = null;
+  recPhotoBase64 = null;
+  retPhotoBase64 = null;
+  currentRetiradaId = null;
+
+  // Reset forms
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  ['recDescricao', 'recRemetente', 'recObs', 'envDescricao', 'envDestinatario', 'envPortador', 'envTelefone', 'envHorario', 'envObs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const recDest = document.getElementById('recDestinatario');
+  if (recDest) recDest.selectedIndex = 0;
+
+  ['recSubmitBtn', 'envSubmitBtn'].forEach(id => {
+    document.getElementById(id).disabled = true;
+  });
+
+  // Reset photos
+  clearRecPhoto();
+
+  // Close modals
+  document.getElementById('successModal').classList.remove('show');
+  document.getElementById('confirmModal').classList.remove('show');
+  document.getElementById('retiradaModal').classList.remove('show');
+
+  showScreen('home');
+  loadPendentes(); // refresh badge
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LOAD USUARIOS
+// ══════════════════════════════════════════════════════════════
+async function loadUsuarios() {
+  try {
+    const resp = await WC.api.postAuth(WC.config.API_GASES, {
+      tipo_registro: 'listar_usuarios_entregas'
+    });
+    if (resp.status === 'ok' && resp.usuarios) {
+      allUsuarios = resp.usuarios;
+      populateDestinatarioSelect();
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar usuários:', e);
+  }
+}
+
+function populateDestinatarioSelect() {
+  const sel = document.getElementById('recDestinatario');
+  sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
+  allUsuarios.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = JSON.stringify({ nome: u.apelido || u.nome, email: u.email });
+    opt.textContent = u.apelido || u.nome;
+    sel.appendChild(opt);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RECEBIMENTO
+// ══════════════════════════════════════════════════════════════
+function startRecebimento() {
+  const session = WC.auth.getSession();
+  document.getElementById('recUserBadge').textContent = session.nome || session.user?.nome || '—';
+  showScreen('recebimento');
+}
+
+function selectCategoria(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedCategoria = btn.dataset.cat;
+  checkRecReady();
+}
+
+function checkRecReady() {
+  const desc = document.getElementById('recDescricao').value.trim();
+  const dest = document.getElementById('recDestinatario').value;
+  document.getElementById('recSubmitBtn').disabled = !(selectedCategoria && desc && dest);
+}
+
+// Photos (recebimento)
+function handleRecPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const max = 800;
+      let w = img.width, h = img.height;
+      if (w > max) { h = h * (max / w); w = max; }
+      if (h > max) { w = w * (max / h); h = max; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      recPhotoBase64 = c.toDataURL('image/jpeg', 0.7).split(',')[1];
+      document.getElementById('recPhotoPreview').src = c.toDataURL('image/jpeg', 0.7);
+      document.getElementById('recPhotoPreview').style.display = 'block';
+      document.getElementById('recPhotoActions').style.display = 'flex';
+      document.getElementById('recPhotoArea').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function clearRecPhoto() {
+  recPhotoBase64 = null;
+  document.getElementById('recPhotoPreview').style.display = 'none';
+  document.getElementById('recPhotoActions').style.display = 'none';
+  document.getElementById('recPhotoArea').style.display = '';
+  document.getElementById('recPhotoInput').value = '';
+}
+
+function confirmRecebimento() {
+  const session = WC.auth.getSession();
+  const operador = session.nome || session.user?.nome || '—';
+  const destData = JSON.parse(document.getElementById('recDestinatario').value);
+  const desc = document.getElementById('recDescricao').value.trim();
+  const rem = document.getElementById('recRemetente').value.trim();
+  const obs = document.getElementById('recObs').value.trim();
+
+  const catEmoji = { 'Delivery': '🍔', 'Correios/Transportadora': '📬', 'Material Odontológico': '🦷', 'Documento': '📋', 'Outros': '📦' };
+  const emoji = catEmoji[selectedCategoria] || '📦';
+
+  let h = '';
+  h += `<div class="row"><span class="label">Categoria</span><span class="value">${emoji} ${selectedCategoria}</span></div>`;
+  h += `<div class="row"><span class="label">Descrição</span><span class="value">${desc}</span></div>`;
+  h += `<div class="row"><span class="label">Para</span><span class="value">${destData.nome}</span></div>`;
+  if (rem) h += `<div class="row"><span class="label">De</span><span class="value">${rem}</span></div>`;
+  h += `<div class="row"><span class="label">Operador</span><span class="value">${operador}</span></div>`;
+  h += `<div class="row"><span class="label">Foto</span><span class="value">${recPhotoBase64 ? '✅ Anexada' : 'Não anexada'}</span></div>`;
+  if (obs) h += `<div class="row"><span class="label">Obs</span><span class="value">${obs}</span></div>`;
+
+  document.getElementById('confirmSummary').innerHTML = h;
+  document.getElementById('confirmTitle').textContent = 'Confirmar Recebimento?';
+
+  currentPendingType = 'recebimento';
+  pendingPayload = {
+    tipo_registro: 'registrar_recebimento',
+    categoria: selectedCategoria,
+    descricao: desc,
+    destinatario: destData.nome,
+    email_destinatario: destData.email,
+    remetente: rem || '—',
+    operador: operador,
+    foto_base64: recPhotoBase64 || '',
+    observacao: obs || '—'
+  };
+
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ENVIO
+// ══════════════════════════════════════════════════════════════
+function startEnvio() {
+  const session = WC.auth.getSession();
+  document.getElementById('envUserBadge').textContent = session.nome || session.user?.nome || '—';
+  showScreen('envio');
+}
+
+function checkEnvReady() {
+  const desc = document.getElementById('envDescricao').value.trim();
+  const dest = document.getElementById('envDestinatario').value.trim();
+  const port = document.getElementById('envPortador').value.trim();
+  document.getElementById('envSubmitBtn').disabled = !(desc && dest && port);
+}
+
+function confirmEnvio() {
+  const session = WC.auth.getSession();
+  const operador = session.nome || session.user?.nome || '—';
+  const desc = document.getElementById('envDescricao').value.trim();
+  const cat = document.getElementById('envCategoria').value;
+  const dest = document.getElementById('envDestinatario').value.trim();
+  const port = document.getElementById('envPortador').value.trim();
+  const tel = document.getElementById('envTelefone').value.trim();
+  const hora = document.getElementById('envHorario').value;
+  const obs = document.getElementById('envObs').value.trim();
+
+  let h = '';
+  h += `<div class="row"><span class="label">Descrição</span><span class="value">${desc}</span></div>`;
+  h += `<div class="row"><span class="label">Categoria</span><span class="value">${cat}</span></div>`;
+  h += `<div class="row"><span class="label">Para</span><span class="value">${dest}</span></div>`;
+  h += `<div class="row"><span class="label">Portador</span><span class="value">${port}</span></div>`;
+  if (tel) h += `<div class="row"><span class="label">Telefone</span><span class="value">${tel}</span></div>`;
+  if (hora) h += `<div class="row"><span class="label">Horário</span><span class="value">${hora}</span></div>`;
+  h += `<div class="row"><span class="label">Responsável</span><span class="value">${operador}</span></div>`;
+  if (obs) h += `<div class="row"><span class="label">Obs</span><span class="value">${obs}</span></div>`;
+
+  document.getElementById('confirmSummary').innerHTML = h;
+  document.getElementById('confirmTitle').textContent = 'Confirmar Envio?';
+
+  currentPendingType = 'envio';
+  pendingPayload = {
+    tipo_registro: 'registrar_envio',
+    descricao: desc,
+    categoria: cat,
+    destinatario_externo: dest,
+    remetente_interno: currentUser ? (currentUser.apelido || currentUser.nome) : operador,
+    portador: port,
+    telefone_portador: tel || '',
+    horario_previsto: hora || '',
+    operador: operador,
+    observacao: obs || '—'
+  };
+
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SUBMIT (shared)
+// ══════════════════════════════════════════════════════════════
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); }
+
+async function submitCurrent() {
+  document.getElementById('confirmModal').classList.remove('show');
+
+  const isRec = currentPendingType === 'recebimento';
+  const btnId = isRec ? 'recSubmitBtn' : 'envSubmitBtn';
+  const spinId = isRec ? 'recSpinner' : 'envSpinner';
+  const errId = isRec ? 'recErrorMsg' : 'envErrorMsg';
+
+  const btn = document.getElementById(btnId);
+  const spin = document.getElementById(spinId);
+  const err = document.getElementById(errId);
+
+  btn.disabled = true;
+  spin.classList.add('show');
+  err.classList.remove('show');
+
+  try {
+    const resp = await WC.api.postAuth(WC.config.API_GASES, pendingPayload);
+    if (resp.status !== 'ok') throw new Error(resp.msg || 'Erro ao registrar');
+
+    let txt = '';
+    if (isRec) {
+      txt = `📥 Recebimento registrado!\n\n${pendingPayload.categoria} para ${pendingPayload.destinatario}\nID: ${resp.id}\n\n📧 Email de notificação enviado.`;
+    } else {
+      txt = `📤 Envio registrado!\n\nAguardando retirada por ${pendingPayload.portador}\nID: ${resp.id}`;
+    }
+
+    document.getElementById('successText').textContent = txt;
+    document.getElementById('successModal').classList.add('show');
+  } catch (e) {
+    err.textContent = e.message || 'Erro de conexão.';
+    err.classList.add('show');
+    btn.disabled = false;
+  } finally {
+    spin.classList.remove('show');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  PENDENTES
+// ══════════════════════════════════════════════════════════════
+let pendentesFilter = 'todos';
+
+async function loadPendentes() {
+  try {
+    const userName = currentUser ? (currentUser.apelido || currentUser.nome) : '';
+    const resp = await WC.api.postAuth(WC.config.API_GASES, {
+      tipo_registro: 'listar_entregas',
+      filtro_usuario: userName,
+      is_gestor: isGestor
+    });
+    if (resp.status === 'ok') {
+      allEntregas = resp.entregas || [];
+      renderPendentes();
+      renderMinhasEntregas();
+      updateBadge();
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar entregas:', e);
+  }
+}
+
+function updateBadge() {
+  const pendentes = allEntregas.filter(e => e.status === 'Pendente' || e.status === 'Aguardando Retirada');
+  const badge = document.getElementById('badgePendentes');
+  if (pendentes.length > 0) {
+    badge.textContent = pendentes.length;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderMinhasEntregas() {
+  const container = document.getElementById('minhasEntregasList');
+  const section = document.getElementById('minhasEntregas');
+  const userName = currentUser ? (currentUser.apelido || currentUser.nome) : '';
+
+  const minhas = allEntregas.filter(e =>
+    (e.status === 'Pendente' || e.status === 'Aguardando Retirada') &&
+    (e.destinatario === userName || e.remetente === userName)
+  );
+
+  if (minhas.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  container.innerHTML = minhas.map(e => renderEntregaCard(e, true)).join('');
+}
+
+function filterPendentes(tipo, btn) {
+  pendentesFilter = tipo;
+  if (btn) {
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderPendentes();
+}
+
+function renderPendentes() {
+  const container = document.getElementById('pendentesList');
+  let items = allEntregas.filter(e => e.status === 'Pendente' || e.status === 'Aguardando Retirada');
+
+  if (pendentesFilter !== 'todos') {
+    items = items.filter(e => e.tipo === pendentesFilter);
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="entrega-empty"><div class="empty-icon">📭</div>Nenhuma entrega pendente</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(e => renderEntregaCard(e, true)).join('');
+}
+
+function renderEntregaCard(e, clickable) {
+  const catEmoji = { 'Delivery': '🍔', 'Correios/Transportadora': '📬', 'Material Odontológico': '🦷', 'Documento': '📋', 'Outros': '📦' };
+  const emoji = catEmoji[e.categoria] || '📦';
+  const isPendente = e.status === 'Pendente' || e.status === 'Aguardando Retirada';
+  const tipoClass = e.tipo === 'Recebimento' ? 'recebimento' : 'envio';
+  const statusClass = isPendente ? (e.status === 'Aguardando Retirada' ? 'aguardando' : 'pendente') : 'concluido';
+
+  const onclick = (clickable && isPendente) ? `onclick="openRetirada('${e.id}','${e.tipo}')"` : '';
+
+  return `<div class="entrega-card ${tipoClass} ${isPendente ? '' : 'concluido'}" ${onclick}>
+    <div class="entrega-top">
+      <div class="entrega-cat">${emoji} ${e.categoria} · <span style="color:${e.tipo === 'Recebimento' ? 'var(--verde)' : 'var(--dourado)'};font-weight:600;">${e.tipo}</span></div>
+      <div class="entrega-status ${statusClass}">${e.status}</div>
+    </div>
+    <div class="entrega-desc">${e.descricao}</div>
+    <div class="entrega-meta">
+      <span>👤 ${e.tipo === 'Recebimento' ? 'Para: ' + e.destinatario : 'De: ' + e.remetente}</span>
+      <span>📅 ${e.dataRegistro} ${e.horaRegistro}</span>
+      ${e.horarioPrevisto ? '<span>⏰ Previsto: ' + e.horarioPrevisto + '</span>' : ''}
+    </div>
+    ${!isPendente ? '<div style="font-size:11px;color:var(--verde);margin-top:6px;">✅ Concluído em ' + e.dataConclusao + ' ' + e.horaConclusao + (e.nomeRetirou ? ' · ' + e.nomeRetirou : '') + '</div>' : ''}
+    <div style="font-size:10px;color:var(--cinza-texto);margin-top:4px;">ID: ${e.id} · Operador: ${e.operador}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RETIRADA
+// ══════════════════════════════════════════════════════════════
+function openRetirada(id, tipo) {
+  currentRetiradaId = id;
+  currentRetiradaTipo = tipo;
+  retPhotoBase64 = null;
+
+  const entrega = allEntregas.find(e => e.id === id);
+  if (!entrega) return;
+
+  const isEnvio = tipo === 'Envio';
+
+  document.getElementById('retiradaTitle').textContent = isEnvio ? 'Confirmar Retirada pelo Portador' : 'Confirmar Retirada';
+
+  let info = '';
+  info += `<div class="ri-label">ID</div><div class="ri-value">${entrega.id}</div>`;
+  info += `<div class="ri-label">${isEnvio ? 'Descrição' : 'Categoria'}</div><div class="ri-value">${isEnvio ? entrega.descricao : entrega.categoria + ' — ' + entrega.descricao}</div>`;
+  info += `<div class="ri-label">${isEnvio ? 'Para' : 'Destinatário'}</div><div class="ri-value">${entrega.destinatario || entrega.remetente}</div>`;
+  if (isEnvio && entrega.nomeRetirou) {
+    info += `<div class="ri-label">Portador esperado</div><div class="ri-value">${entrega.nomeRetirou}</div>`;
+  }
+  if (entrega.horarioPrevisto) {
+    info += `<div class="ri-label">Horário previsto</div><div class="ri-value">${entrega.horarioPrevisto}</div>`;
+  }
+
+  document.getElementById('retiradaInfo').innerHTML = info;
+
+  // Mostrar campo telefone para envios
+  document.getElementById('retTelefoneField').style.display = isEnvio ? 'block' : 'none';
+
+  // Pre-fill nome do portador se for envio
+  document.getElementById('retNome').value = isEnvio ? (entrega.nomeRetirou || '') : '';
+  document.getElementById('retTelefone').value = isEnvio ? (entrega.telefoneRetirou || '') : '';
+
+  // Reset photo
+  clearRetPhoto();
+
+  document.getElementById('retiradaModal').classList.add('show');
+}
+
+function closeRetirada() {
+  document.getElementById('retiradaModal').classList.remove('show');
+  currentRetiradaId = null;
+  retPhotoBase64 = null;
+}
+
+// Photos (retirada)
+function handleRetPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const max = 800;
+      let w = img.width, h = img.height;
+      if (w > max) { h = h * (max / w); w = max; }
+      if (h > max) { w = w * (max / h); h = max; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      retPhotoBase64 = c.toDataURL('image/jpeg', 0.7).split(',')[1];
+      document.getElementById('retPhotoPreview').src = c.toDataURL('image/jpeg', 0.7);
+      document.getElementById('retPhotoPreview').style.display = 'block';
+      document.getElementById('retPhotoActions').style.display = 'flex';
+      document.getElementById('retPhotoArea').style.display = 'none';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function clearRetPhoto() {
+  retPhotoBase64 = null;
+  document.getElementById('retPhotoPreview').style.display = 'none';
+  document.getElementById('retPhotoActions').style.display = 'none';
+  document.getElementById('retPhotoArea').style.display = '';
+  document.getElementById('retPhotoInput').value = '';
+}
+
+async function submitRetirada() {
+  const nome = document.getElementById('retNome').value.trim();
+  if (!nome) {
+    WC.ui.toast('Informe o nome de quem está retirando.', 'error');
+    return;
+  }
+
+  const tel = document.getElementById('retTelefone').value.trim();
+
+  document.getElementById('retiradaModal').classList.remove('show');
+  WC.ui.showLoading('Registrando retirada...');
+
+  try {
+    const resp = await WC.api.postAuth(WC.config.API_GASES, {
+      tipo_registro: 'confirmar_retirada',
+      id: currentRetiradaId,
+      nome_retirou: nome,
+      telefone_retirou: tel || '',
+      foto_base64: retPhotoBase64 || ''
+    });
+
+    WC.ui.hideLoading();
+
+    if (resp.status !== 'ok') throw new Error(resp.msg || 'Erro');
+
+    WC.ui.toast('Retirada confirmada! ✅', 'success');
+    currentRetiradaId = null;
+    retPhotoBase64 = null;
+    loadPendentes();
+  } catch (e) {
+    WC.ui.hideLoading();
+    WC.ui.toast(e.message || 'Erro ao confirmar retirada.', 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HISTÓRICO (gestão)
+// ══════════════════════════════════════════════════════════════
+let historicoFilter = 'todos';
+
+async function loadHistorico() {
+  try {
+    const userName = currentUser ? (currentUser.apelido || currentUser.nome) : '';
+    const resp = await WC.api.postAuth(WC.config.API_GASES, {
+      tipo_registro: 'listar_entregas',
+      filtro_usuario: userName,
+      is_gestor: isGestor
+    });
+    if (resp.status === 'ok') {
+      allEntregas = resp.entregas || [];
+      renderHistorico();
+    }
+  } catch (e) {
+    document.getElementById('historicoList').innerHTML = '<div class="entrega-empty"><div class="empty-icon">⚠️</div>Erro ao carregar histórico</div>';
+  }
+}
+
+function filterHistorico(status, btn) {
+  historicoFilter = status;
+  if (btn) {
+    btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const container = document.getElementById('historicoList');
+  let items = [...allEntregas];
+
+  if (historicoFilter === 'Pendente') {
+    items = items.filter(e => e.status === 'Pendente' || e.status === 'Aguardando Retirada');
+  } else if (historicoFilter === 'Concluído') {
+    items = items.filter(e => e.status === 'Concluído');
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="entrega-empty"><div class="empty-icon">📋</div>Nenhuma entrega encontrada</div>';
+    return;
+  }
+
+  container.innerHTML = items.map(e => renderEntregaCard(e, e.status !== 'Concluído')).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+WC.api.init();
+init();
+</script>
+</body>
+</html>
