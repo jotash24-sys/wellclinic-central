@@ -1,1349 +1,231 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>Well Clinic — Controle de Gases</title>
-  <link rel="stylesheet" href="css/wellclinic.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    /* ── PAGE-SPECIFIC STYLES ── */
-    .gases-hero-wrapper {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-      animation: wc-fadeUp 0.3s ease;
-    }
-
-    /* ── ESTOQUE GRID ── */
-    .cylinder-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .cylinder-card {
-      background: var(--branco);
-      border: 1.5px solid var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .cylinder-card:hover {
-      border-color: var(--verde);
-      box-shadow: var(--sombra-md);
-    }
-
-    .cylinder-card.selected {
-      background: var(--verde-bg);
-      border-color: var(--verde);
-      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.15);
-    }
-
-    .cylinder-id {
-      font-family: var(--font-titulo);
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--azul);
-      margin-bottom: 4px;
-    }
-
-    .cylinder-tipo {
-      font-size: 11px;
-      color: var(--cinza-texto);
-      margin-bottom: 8px;
-    }
-
-    .cylinder-status {
-      display: inline-block;
-    }
-
-    /* ── VALVE SECTION ── */
-    .valve-header {
-      background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
-      color: var(--branco);
-      padding: 24px 20px;
-      border-radius: var(--radius);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .valve-header.closing {
-      background: linear-gradient(135deg, var(--azul), var(--azul-medio));
-    }
-
-    .valve-header__icon {
-      font-size: 32px;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .valve-header__title {
-      font-family: var(--font-titulo);
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .valve-header__subtitle {
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    /* ── CHECKLIST ITEMS ── */
-    .checklist-container {
-      margin: 20px 0;
-    }
-
-    .checklist-header {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--azul);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Use existing wc-check-item from wellclinic.css */
-
-    /* ── SECTION DIVIDER ── */
-    .section-divider {
-      margin: 24px 0;
-      padding: 16px 0;
-      border-top: 1px solid var(--cinza-leve);
-      border-bottom: 1px solid var(--cinza-leve);
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--cinza-texto);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* ── MODAL GRID ── */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .grid-2.full {
-      grid-template-columns: 1fr;
-    }
-
-    /* ── SIGNATURE & PHOTO ── */
-    .signature-container {
-      background: var(--branco);
-      border: 2px dashed var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      margin-bottom: 16px;
-      overflow: hidden;
-    }
-
-    .signature-canvas {
-      width: 100%;
-      height: 150px;
-      display: block;
-      cursor: crosshair;
-      touch-action: none;
-      background: var(--marfim-warm);
-    }
-
-    .photo-preview {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-    }
-
-    /* ── ACTION BUTTONS ── */
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .action-btn {
-      padding: 16px 12px;
-      background: var(--branco);
-      border: 1.5px solid var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      text-align: center;
-      transition: var(--transition);
-      font-weight: 500;
-    }
-
-    .action-btn:hover {
-      border-color: var(--verde);
-    }
-
-    .action-btn.selected {
-      background: var(--verde-bg);
-      border-color: var(--verde);
-      color: var(--verde);
-      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.1);
-    }
-
-    .action-btn.selected.danger {
-      background: var(--vermelho-bg);
-      border-color: var(--vermelho);
-      color: var(--vermelho);
-      box-shadow: 0 0 0 3px rgba(212, 100, 74, 0.1);
-    }
-
-    .action-icon {
-      font-size: 24px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .action-label {
-      font-size: 12px;
-    }
-
-    /* ── INVOICE ITEMS ── */
-    .invoice-items {
-      margin-bottom: 20px;
-    }
-
-    .invoice-item {
-      background: var(--marfim-warm);
-      padding: 16px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-      position: relative;
-    }
-
-    .invoice-item__remove {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: var(--vermelho);
-      color: var(--branco);
-      border: none;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    .invoice-item__remove:hover {
-      background: var(--terra);
-    }
-
-    .invoice-item__text {
-      font-size: 13px;
-      color: var(--grafite);
-      margin-bottom: 8px;
-    }
-
-    /* ── HISTORY ── */
-    .history-item {
-      background: var(--branco);
-      border: 1px solid var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      padding: 14px;
-      margin-bottom: 10px;
-      animation: wc-fadeUp 0.3s ease both;
-    }
-
-    .history-item:nth-child(2) { animation-delay: 0.05s; }
-    .history-item:nth-child(3) { animation-delay: 0.1s; }
-    .history-item:nth-child(4) { animation-delay: 0.15s; }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .history-type {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--azul);
-    }
-
-    .history-time {
-      font-size: 11px;
-      color: var(--cinza-texto);
-    }
-
-    .history-detail {
-      font-size: 12px;
-      color: var(--cinza-texto);
-      line-height: 1.5;
-    }
-
-    .history-empty {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--cinza-texto);
-    }
-
-    .history-empty__icon {
-      font-size: 48px;
-      opacity: 0.3;
-      margin-bottom: 12px;
-    }
-
-    /* ── UTILITY ── */
-    .wc-hidden { display: none !important; }
-
-    .button-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .button-group.full {
-      grid-template-columns: 1fr;
-    }
-
-    .form-hint {
-      font-size: 12px;
-      color: var(--cinza-texto);
-      margin-top: 6px;
-      line-height: 1.5;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Well Clinic — Controle de Gases</title>
+<link rel="stylesheet" href="css/wellclinic.css">
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+/* PAGE-SPECIFIC CSS FOR GASES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeUp .5s ease-out both}.delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}
+.home-greeting{text-align:center;margin-bottom:24px;animation:fadeUp .5s ease-out}
+.home-greeting h2{font-family:var(--font-titulo);font-size:22px;font-weight:600;color:var(--azul);margin-bottom:4px}
+.home-greeting p{font-size:13px;color:var(--cinza-texto)}
+.home-menu{display:flex;flex-direction:column;gap:14px}
+.menu-btn{background:var(--branco);border-radius:var(--radius);box-shadow:var(--sombra-md);border:1px solid var(--cinza-leve);cursor:pointer;display:flex;align-items:stretch;transition:all .3s;overflow:hidden;text-align:left}
+.menu-btn:active{transform:scale(.98)}
+.menu-stripe{width:5px;flex-shrink:0}
+.menu-open .menu-stripe{background:linear-gradient(180deg,var(--dourado),var(--dourado-claro))}
+.menu-close .menu-stripe{background:linear-gradient(180deg,var(--azul),var(--azul-medio))}
+.menu-move .menu-stripe{background:linear-gradient(180deg,var(--verde),var(--verde-claro))}
+.menu-nf .menu-stripe{background:linear-gradient(180deg,var(--terra),#D4765E)}
+.menu-content{padding:20px 18px;display:flex;align-items:center;gap:16px;flex:1}
+.menu-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.menu-open .menu-icon{background:var(--dourado-bg)}.menu-close .menu-icon{background:rgba(15,31,58,.06)}.menu-move .menu-icon{background:var(--verde-bg)}.menu-nf .menu-icon{background:var(--terra-bg)}
+.menu-text{flex:1}.menu-text h3{font-family:var(--font-titulo);font-size:16px;font-weight:600;color:var(--azul);margin-bottom:3px}.menu-text p{font-size:12px;color:var(--cinza-texto);line-height:1.4}
+.menu-arrow{color:var(--dourado);font-size:18px;padding-right:16px;display:flex;align-items:center;opacity:.4}
+.menu-nf.hidden{display:none}
+.card{background:var(--branco);border-radius:var(--radius);box-shadow:var(--sombra-sm);border:1px solid var(--cinza-leve);padding:22px 18px;margin-bottom:14px}
+.card-title{font-family:var(--font-titulo);font-size:13px;font-weight:600;color:var(--azul);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.card-title .step{width:24px;height:24px;background:linear-gradient(135deg,var(--azul),var(--azul-medio));color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-corpo);font-size:11px;font-weight:600;flex-shrink:0}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:12px;font-weight:500;color:var(--cinza-texto);margin-bottom:8px;letter-spacing:.3px}
+input,select{width:100%;padding:15px 14px;font-family:var(--font-corpo);font-size:15px;border:2px solid var(--cinza-leve);border-radius:var(--radius-sm);background:var(--marfim);color:var(--grafite);transition:all .3s;-webkit-appearance:none}
+input::placeholder{color:rgba(45,45,58,.3)}
+input:focus,select:focus{outline:none;border-color:var(--dourado);background:#fff;box-shadow:0 0 0 3px rgba(160,137,108,.12)}
+input:read-only{background:var(--marfim-warm);color:var(--cinza-texto);cursor:not-allowed}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A5A6E' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.cyl-banner{background:linear-gradient(135deg,var(--azul),var(--azul-medio));border-radius:var(--radius);box-shadow:var(--sombra-forte);padding:24px 20px;margin-bottom:16px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.cyl-banner::after{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle,rgba(160,137,108,.12),transparent 70%);border-radius:50%}
+.cyl-tag{display:inline-block;font-family:var(--font-corpo);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:2px;padding:5px 14px;border-radius:20px;margin-bottom:12px;position:relative}
+.cyl-banner.n2o .cyl-tag{background:rgba(74,158,142,.2);color:var(--verde-claro)}.cyl-banner.o2 .cyl-tag{background:rgba(160,137,108,.2);color:var(--dourado-claro)}
+.cyl-id{font-family:var(--font-titulo);font-size:30px;font-weight:700;margin-bottom:4px;position:relative}
+.cyl-cap{font-size:13px;opacity:.6;font-weight:300;position:relative}
+.valve-header{border-radius:var(--radius);box-shadow:var(--sombra-forte);padding:28px 20px;margin-bottom:16px;text-align:center;color:#fff;position:relative;overflow:hidden}
+.valve-header.opening{background:linear-gradient(135deg,#8B6914,var(--dourado),var(--dourado-claro))}
+.valve-header.closing{background:linear-gradient(135deg,var(--azul),var(--azul-medio),var(--azul-soft))}
+.valve-header .valve-icon{font-size:38px;margin-bottom:10px;position:relative}
+.valve-header h2{font-family:var(--font-titulo);font-size:22px;font-weight:600;position:relative}
+.valve-header p{font-size:13px;opacity:.7;font-weight:300;margin-top:4px;position:relative}
+.action-toggle{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.action-btn{padding:20px 10px;border:2px solid var(--cinza-leve);border-radius:var(--radius-sm);background:#fff;font-family:var(--font-corpo);font-size:13px;font-weight:600;color:var(--cinza-texto);cursor:pointer;text-align:center;transition:all .3s;line-height:1.3}
+.action-btn .emoji{display:block;font-size:32px;margin-bottom:8px;transition:transform .3s}
+.action-btn:active .emoji{transform:scale(1.15)}
+.action-btn.selected-out{border-color:var(--terra);background:var(--terra-bg);color:var(--terra);box-shadow:0 4px 15px rgba(184,92,74,.12)}
+.action-btn.selected-in{border-color:var(--verde);background:var(--verde-bg);color:var(--verde);box-shadow:0 4px 15px rgba(74,158,142,.12)}
+.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.loc-btn{padding:16px 10px;border:2px solid var(--cinza-leve);border-radius:var(--radius-sm);background:#fff;font-family:var(--font-corpo);font-size:13px;font-weight:500;color:var(--grafite);cursor:pointer;text-align:center;transition:all .25s}
+.loc-btn:active{transform:scale(.97)}.loc-btn .loc-icon{display:block;font-size:24px;margin-bottom:6px}
+.loc-btn.selected{border-color:var(--verde);background:var(--verde-bg);color:var(--verde)}
+.valve-list{display:flex;flex-direction:column;gap:10px}
+.valve-item{display:flex;align-items:center;gap:12px;padding:14px 14px;background:var(--branco);border:1px solid var(--cinza-leve);border-radius:var(--radius-sm);cursor:pointer;transition:all .25s}
+.valve-item:hover{border-color:var(--dourado-claro)}
+.valve-item.checked{background:var(--verde-bg);border-color:var(--verde)}
+.valve-check{width:24px;height:24px;border:2px solid var(--cinza-leve);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .25s;color:var(--verde);font-size:14px;font-weight:600}
+.valve-item.checked .valve-check{background:var(--verde);border-color:var(--verde);color:#fff}
+.valve-info{flex:1}
+.valve-name{font-size:14px;font-weight:500;color:var(--grafite)}
+.valve-loc{font-size:11px;color:var(--cinza-texto);margin-top:2px}
+.photo-area{border:2px dashed var(--cinza-leve);border-radius:var(--radius-sm);padding:32px 20px;text-align:center;background:var(--marfim);cursor:pointer;transition:all .3s}
+.photo-area:hover{border-color:var(--dourado-claro);background:var(--dourado-bg)}
+.photo-area .cam-icon{font-size:32px;margin-bottom:8px}
+.photo-area p{font-size:13px;color:var(--cinza-texto)}
+.photo-input{display:none}
+.photo-preview{width:100%;border-radius:var(--radius-sm);margin-bottom:12px}
+.photo-actions{display:none;gap:8px;margin-bottom:12px}
+.photo-actions button{flex:1;padding:10px 14px;background:var(--terra);color:#fff;border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all .3s}
+.photo-actions button:active{transform:scale(.95)}
+.sig-container{border:2px dashed var(--cinza-leve);border-radius:var(--radius-sm);background:var(--branco);position:relative;overflow:hidden}
+.sig-container.has-sig{border-color:var(--verde);background:rgba(74,158,142,.02)}
+.sig-container canvas{display:block;width:100%;cursor:crosshair;touch-action:none;background:#fff}
+.sig-placeholder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;color:var(--cinza-texto);opacity:.5;pointer-events:none}
+.sig-container.has-sig .sig-placeholder{display:none}
+.sig-actions{display:flex;gap:8px;margin-top:12px}
+.sig-actions button{flex:1;padding:10px 14px;background:var(--cinza-leve);color:var(--grafite);border:none;border-radius:var(--radius-sm);font-size:12px;font-weight:600;cursor:pointer;transition:all .3s}
+.sig-actions button:active{transform:scale(.95)}
+.nf-item-row{display:grid;grid-template-columns:1fr 120px 120px;gap:10px;margin-bottom:12px}
+.nf-item-row select,.nf-item-row input{width:100%}
+.nf-item-row input{text-align:center}
+.add-item-btn{display:block;width:100%;padding:12px;margin-top:12px;background:var(--verde-bg);color:var(--verde);border:1.5px solid var(--verde);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:all .3s}
+.add-item-btn:active{transform:scale(.98)}
+.submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--verde),var(--verde-claro));color:#fff;font-family:var(--font-corpo);font-size:15px;font-weight:600;border:none;border-radius:var(--radius-sm);cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;margin:24px 0 12px}
+.submit-btn:active:not(:disabled){transform:scale(.98)}
+.submit-btn:disabled{background:var(--cinza-leve);color:var(--cinza-texto);cursor:not-allowed}
+.submit-btn.opening-btn{background:linear-gradient(135deg,var(--dourado),var(--dourado-claro))}
+.submit-btn.closing-btn{background:linear-gradient(135deg,var(--azul),var(--azul-medio))}
+.spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:wc-spin .6s linear infinite;display:none}
+.spinner.show{display:block}
+.error-msg{background:var(--terra-bg);color:var(--terra);font-size:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid rgba(184,92,74,.2);display:none}
+.error-msg.show{display:block}
+.feedback{position:fixed;bottom:0;left:0;right:0;top:0;background:rgba(15,31,58,.5);display:none;align-items:center;justify-content:center;z-index:9000}
+.feedback.show{display:flex}
+.feedback-box{background:#fff;border-radius:var(--radius);padding:32px 24px;width:90%;max-width:380px;box-shadow:var(--sombra-forte);animation:wc-slideUp .3s ease}
+.feedback-box h3{font-family:var(--font-titulo);font-size:18px;font-weight:600;color:var(--azul);margin-bottom:12px;text-align:center}
+.feedback-box p{font-size:13px;color:var(--cinza-texto);text-align:center;line-height:1.6;margin-bottom:20px}
+.feedback-box .check{font-size:48px;text-align:center;margin-bottom:12px}
+.confirm-summary{font-size:12px;color:var(--grafite);margin-bottom:24px;max-height:200px;overflow-y:auto}
+.confirm-summary .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--cinza-leve)}
+.confirm-summary .row:last-child{border-bottom:none}
+.confirm-summary .label{font-weight:600;color:var(--azul);flex:0 0 auto}
+.confirm-summary .value{text-align:right;flex:1}
+.modal-actions{display:flex;flex-direction:column;gap:10px}
+.modal-actions button{padding:14px;border:none;border-radius:var(--radius-sm);font-family:var(--font-corpo);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.modal-actions button:first-child{background:var(--verde);color:#fff}
+.modal-actions button:first-child:active{transform:scale(.98)}
+.btn-secondary{background:var(--cinza-leve);color:var(--grafite)}
+.btn-secondary:active{transform:scale(.98)}
+.last-record{background:var(--verde-bg);border:1px solid var(--verde);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--verde);margin-bottom:12px}
+.footer{border-top:1px solid var(--cinza-leve);text-align:center;padding:24px 0;font-size:12px;color:var(--cinza-texto)}
+.footer-divider{height:1px;background:var(--cinza-leve);margin-bottom:12px}
+.footer-brand{font-family:var(--font-titulo);font-size:13px;font-weight:600;color:var(--azul);margin-bottom:4px}
+.footer-sub{font-size:11px;color:var(--cinza-texto);margin-bottom:8px}
+.footer-dev{font-size:10px;color:var(--cinza-texto);opacity:.7}
+.screen{display:none}
+.screen.active{display:block}
+</style>
 </head>
 <body>
-  <!-- ════════════════════════════════════════════════════════════
-       AUTH OVERLAYS (login + loading)
-       ════════════════════════════════════════════════════════════ -->
-  <div id="wcLoading" class="wc-loading">
-    <div class="wc-loading__spinner"></div>
-    <div class="wc-loading__text">Carregando...</div>
-  </div>
 
-  <div id="wcLogin" class="wc-login">
-    <div class="wc-login__box">
-      <div style="font-size:32px;margin-bottom:12px;">🏥</div>
-      <div class="wc-login__title">Well Clinic</div>
-      <div class="wc-login__subtitle">Controle de Gases</div>
-      <div class="wc-form-group">
-        <input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email">
-      </div>
-      <div class="wc-form-group">
-        <input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric">
-      </div>
-      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button>
-      <div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
-      <div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════════════════════════
-       MAIN APP (hidden until authenticated)
-       ════════════════════════════════════════════════════════════ -->
-  <div id="mainApp" class="wc-hidden">
-    <!-- Hero Header -->
-    <div class="gases-hero-wrapper">
-      <div id="heroContainer"></div>
-    </div>
-
-    <!-- Tabs Navigation -->
-    <div class="wc-container">
-      <div class="wc-tabs">
-        <button class="wc-tab wc-tab--active" onclick="showTab('estoque')">Estoque</button>
-        <button class="wc-tab" onclick="showTab('valvulas')">Válvulas</button>
-        <button class="wc-tab" onclick="showTab('movimentacao')">Movimentação</button>
-        <button class="wc-tab" onclick="showTab('notas_fiscais')">Notas Fiscais</button>
-      </div>
-    </div>
-
-    <!-- ═══ TAB: ESTOQUE ═══ -->
-    <div id="tabEstoque" class="tab-content active">
-      <div class="wc-container">
-        <!-- Estoque Summary -->
-        <div class="wc-card">
-          <div class="wc-card__title">📦 Resumo do Estoque</div>
-          <div class="cylinder-grid" id="estoque-grid"></div>
-        </div>
-
-        <!-- QR Code Scanner -->
-        <div class="wc-card">
-          <div class="wc-card__title">📱 Scanner QR</div>
-          <div id="qr-reader" style="width: 100%; max-height: 300px;"></div>
-          <div id="qrResult" style="margin-top: 12px; display: none;">
-            <p class="wc-text-sm" style="color: var(--verde); font-weight: 600;">
-              Cilindro selecionado: <span id="qrCylinderDisplay"></span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="wc-card">
-          <div class="wc-card__title">⚡ Ações Rápidas</div>
-          <button class="wc-btn wc-btn--secondary wc-btn--full wc-mb-8" onclick="startValve('abertura')">
-            🔓 Abrir Válvula
-          </button>
-          <button class="wc-btn wc-btn--secondary wc-btn--full wc-mb-8" onclick="startValve('fechamento')">
-            🔒 Fechar Válvula
-          </button>
-          <button class="wc-btn wc-btn--secondary wc-btn--full wc-mb-8" onclick="startMovement()">
-            📦 Registrar Movimentação
-          </button>
-          <button class="wc-btn wc-btn--secondary wc-btn--full" onclick="startInvoice()">
-            📄 Registrar Nota Fiscal
-          </button>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="wc-card">
-          <div class="wc-card__title">📝 Atividade Recente</div>
-          <div id="history-container"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ TAB: VÁLVULAS ═══ -->
-    <div id="tabValvulas" class="tab-content">
-      <div class="wc-container">
-        <div class="valve-header">
-          <span class="valve-header__icon">🔓</span>
-          <div class="valve-header__title" id="valveTitle">Abertura de Válvulas</div>
-          <div class="valve-header__subtitle" id="valveSubtitle">Registre a abertura de cilindros para o dia</div>
-        </div>
-
-        <form id="valveForm" class="wc-card">
-          <div class="wc-card__title">🔧 Detalhes da Operação</div>
-
-          <!-- Ação -->
-          <div class="wc-form-group">
-            <label class="wc-label">Tipo de Operação</label>
-            <select id="valveAction" class="wc-select" onchange="updateValveUI()">
-              <option value="">Selecione...</option>
-              <option value="abertura">Abertura</option>
-              <option value="fechamento">Fechamento</option>
-            </select>
-          </div>
-
-          <!-- Data/Hora -->
-          <div class="wc-form-group">
-            <label class="wc-label">Data e Hora</label>
-            <input type="datetime-local" id="valveDateTime" class="wc-input" required>
-          </div>
-
-          <!-- Válvulas (checkboxes) -->
-          <div class="wc-form-group">
-            <label class="wc-label">Válvulas a Operar</label>
-            <div class="checklist-container">
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox">
-                  <span style="color: var(--branco); font-weight: bold;">✓</span>
-                </div>
-                <input type="checkbox" name="valve" value="O2" style="display: none;">
-                <span class="wc-check-item__text">Oxigênio (O2)</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox">
-                  <span style="color: var(--branco); font-weight: bold;">✓</span>
-                </div>
-                <input type="checkbox" name="valve" value="N2O" style="display: none;">
-                <span class="wc-check-item__text">Óxido Nitroso (N2O)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Checklist -->
-          <div class="wc-form-group">
-            <label class="wc-label">✅ Checklist Obrigatório</label>
-            <div class="checklist-container">
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="pressao" style="display: none;">
-                <span class="wc-check-item__text">Verificar pressão do manômetro</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="vazamentos" style="display: none;">
-                <span class="wc-check-item__text">Verificar se não há vazamentos</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="conexoes" style="display: none;">
-                <span class="wc-check-item__text">Verificar se as conexões estão firmes</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="validade" style="display: none;">
-                <span class="wc-check-item__text">Verificar data de validade do cilindro</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="ventilacao" style="display: none;">
-                <span class="wc-check-item__text">Confirmar que a área está ventilada</span>
-              </div>
-              <div class="wc-check-item" onclick="toggleCheckbox(this)">
-                <div class="wc-check-item__checkbox"><span style="color: var(--branco);">✓</span></div>
-                <input type="checkbox" class="checklist-item" value="fluxometro" style="display: none;">
-                <span class="wc-check-item__text">Verificar se o fluxômetro está zerado</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Observações -->
-          <div class="wc-form-group">
-            <label class="wc-label">Observações (opcional)</label>
-            <textarea id="valveObservacao" class="wc-textarea" placeholder="Registre qualquer informação importante..."></textarea>
-          </div>
-
-          <!-- Assinatura -->
-          <div class="wc-form-group">
-            <label class="wc-label">Assinatura Digital</label>
-            <div class="signature-container">
-              <canvas id="valveSignature" class="signature-canvas"></canvas>
-            </div>
-            <button type="button" class="wc-btn wc-btn--outline wc-btn--sm" onclick="clearValveSignature()">
-              Limpar Assinatura
-            </button>
-          </div>
-
-          <!-- Responsável (auto-fill) -->
-          <div class="wc-form-group">
-            <label class="wc-label">Responsável</label>
-            <input type="text" id="valveResponsavel" class="wc-input" readonly>
-          </div>
-
-          <button type="button" class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg wc-mt-16" onclick="submitValve()">
-            ✓ Registrar Operação de Válvula
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══ TAB: MOVIMENTAÇÃO ═══ -->
-    <div id="tabMovimentacao" class="tab-content">
-      <div class="wc-container">
-        <form id="movementForm" class="wc-card">
-          <div class="wc-card__title">📦 Registrar Movimentação</div>
-
-          <!-- Cilindro -->
-          <div class="wc-form-group">
-            <label class="wc-label">Selecione o Cilindro</label>
-            <select id="moveSelectCylinder" class="wc-select" onchange="updateMovementUI()" required>
-              <option value="">Escanear QR ou selecionar...</option>
-            </select>
-          </div>
-
-          <!-- Tipo de Gás -->
-          <div class="wc-form-group">
-            <label class="wc-label">Tipo de Gás</label>
-            <input type="text" id="moveGasType" class="wc-input" readonly placeholder="Será preenchido automaticamente">
-          </div>
-
-          <!-- Capacidade -->
-          <div class="wc-form-group">
-            <label class="wc-label">Capacidade</label>
-            <input type="text" id="moveCapacity" class="wc-input" readonly placeholder="Será preenchida automaticamente">
-          </div>
-
-          <!-- Ação -->
-          <div class="wc-form-group">
-            <label class="wc-label">Tipo de Movimento</label>
-            <div class="action-grid">
-              <button type="button" class="action-btn" onclick="selectAction(this, 'Troca')" data-action="Troca">
-                <span class="action-icon">🔄</span>
-                <span class="action-label">Troca</span>
-              </button>
-              <button type="button" class="action-btn" onclick="selectAction(this, 'Retirada')" data-action="Retirada">
-                <span class="action-icon">📤</span>
-                <span class="action-label">Retirada</span>
-              </button>
-              <button type="button" class="action-btn" onclick="selectAction(this, 'Devolução')" data-action="Devolução">
-                <span class="action-icon">📥</span>
-                <span class="action-label">Devolução</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Localização -->
-          <div class="wc-form-group">
-            <label class="wc-label">Localização</label>
-            <select id="moveLocation" class="wc-select" required>
-              <option value="">Selecione...</option>
-              <option value="Consultório 1">Consultório 1</option>
-              <option value="Consultório 2">Consultório 2</option>
-              <option value="Consultório 3">Consultório 3</option>
-              <option value="Consultório 4">Consultório 4</option>
-              <option value="Almoxarifado">Almoxarifado</option>
-              <option value="Outro">Outro</option>
-            </select>
-          </div>
-
-          <div class="wc-form-group wc-hidden" id="moveOtherLocDiv">
-            <label class="wc-label">Especifique a Localização</label>
-            <input type="text" id="moveOtherLocation" class="wc-input" placeholder="Digite o local...">
-          </div>
-
-          <!-- Status Novo -->
-          <div class="wc-form-group">
-            <label class="wc-label">Status do Cilindro</label>
-            <select id="moveStatus" class="wc-select" required>
-              <option value="">Selecione...</option>
-              <option value="Cheio">Cheio</option>
-              <option value="Em uso">Em uso</option>
-              <option value="Vazio">Vazio</option>
-              <option value="Reserva">Reserva</option>
-            </select>
-          </div>
-
-          <!-- Foto -->
-          <div class="wc-form-group">
-            <label class="wc-label">Fotografia (opcional)</label>
-            <input type="file" id="movePhotoInput" class="wc-input" accept="image/*" capture="environment" onchange="handlePhoto('movePhotoInput', 'movePhotoPreview')">
-            <div id="movePhotoPreview" style="margin-top: 12px; display: none;">
-              <img src="" alt="Preview" class="photo-preview">
-              <button type="button" class="wc-btn wc-btn--outline wc-btn--sm" onclick="clearPhoto('movePhotoInput', 'movePhotoPreview')">
-                Remover Foto
-              </button>
-            </div>
-          </div>
-
-          <!-- Observações -->
-          <div class="wc-form-group">
-            <label class="wc-label">Observações (opcional)</label>
-            <textarea id="moveObservacao" class="wc-textarea" placeholder="Registre qualquer informação importante..."></textarea>
-          </div>
-
-          <!-- Assinatura -->
-          <div class="wc-form-group">
-            <label class="wc-label">Assinatura Digital</label>
-            <div class="signature-container">
-              <canvas id="moveSignature" class="signature-canvas"></canvas>
-            </div>
-            <button type="button" class="wc-btn wc-btn--outline wc-btn--sm" onclick="clearMoveSignature()">
-              Limpar Assinatura
-            </button>
-          </div>
-
-          <!-- Responsável (auto-fill) -->
-          <div class="wc-form-group">
-            <label class="wc-label">Responsável</label>
-            <input type="text" id="moveResponsavel" class="wc-input" readonly>
-          </div>
-
-          <button type="button" class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg wc-mt-16" onclick="submitMovement()">
-            ✓ Registrar Movimentação
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- ═══ TAB: NOTAS FISCAIS ═══ -->
-    <div id="tabNotasFiscais" class="tab-content">
-      <div class="wc-container">
-        <form id="invoiceForm" class="wc-card">
-          <div class="wc-card__title">📄 Registrar Nota Fiscal</div>
-
-          <!-- Número NF -->
-          <div class="wc-form-group">
-            <label class="wc-label">Número da Nota Fiscal</label>
-            <input type="text" id="nfNumero" class="wc-input" placeholder="Ex: 12345" required>
-          </div>
-
-          <!-- Fornecedor -->
-          <div class="wc-form-group">
-            <label class="wc-label">Fornecedor</label>
-            <input type="text" id="nfFornecedor" class="wc-input" placeholder="Ex: White Martins" required>
-          </div>
-
-          <!-- Data -->
-          <div class="wc-form-group">
-            <label class="wc-label">Data da Nota Fiscal</label>
-            <input type="date" id="nfData" class="wc-input" required>
-          </div>
-
-          <!-- Itens -->
-          <div class="wc-form-group">
-            <label class="wc-label">Itens</label>
-            <div class="invoice-items" id="nfItems"></div>
-            <button type="button" class="wc-btn wc-btn--outline wc-btn--full" onclick="addInvoiceItem()">
-              + Adicionar Item
-            </button>
-          </div>
-
-          <!-- Observações -->
-          <div class="wc-form-group">
-            <label class="wc-label">Observações (opcional)</label>
-            <textarea id="nfObservacao" class="wc-textarea" placeholder="Registre qualquer informação importante..."></textarea>
-          </div>
-
-          <!-- Responsável (auto-fill) -->
-          <div class="wc-form-group">
-            <label class="wc-label">Responsável</label>
-            <input type="text" id="nfResponsavel" class="wc-input" readonly>
-          </div>
-
-          <button type="button" class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg wc-mt-16" onclick="submitInvoice()">
-            ✓ Registrar Nota Fiscal
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Container -->
-  <div id="wcToastContainer" class="wc-toast-container"></div>
-
-  <!-- Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-
-  <script>
-    // ════════════════════════════════════════════════════════════════
-    // GLOBAL STATE
-    // ════════════════════════════════════════════════════════════════
-    let qrScanner = null;
-    let qrScannerStarted = false;
-    let selectedCylinder = null;
-    let selectedValveAction = null;
-    let selectedMovementAction = null;
-    let valveSignature = null;
-    let moveSignature = null;
-    let invoiceItemCount = 0;
-    let lastActivityData = [];
-
-    // ════════════════════════════════════════════════════════════════
-    // PAGE INITIALIZATION
-    // ════════════════════════════════════════════════════════════════
-    async function init() {
-      WC.api.init();
-      WC.ui.bindAuthEvents(handleAuthSuccess);
-
-      const auth = await WC.auth.init();
-      if (!auth.authenticated) {
-        document.getElementById('mainApp').classList.add('wc-hidden');
-        return;
-      }
-
-      document.getElementById('wcLogin').classList.remove('show');
-      document.getElementById('wcLoading').classList.add('hide');
-      document.getElementById('mainApp').classList.remove('wc-hidden');
-
-      renderHero();
-      initCylinders();
-      initSignatures();
-      setResponsavel();
-      loadEstoque();
-      loadHistory();
-
-      // Check for ?cid= parameter to pre-select cylinder
-      const params = new URLSearchParams(window.location.search);
-      const cid = params.get('cid');
-      if (cid) {
-        selectedCylinder = cid;
-        showTab('movimentacao');
-        setTimeout(() => {
-          document.getElementById('moveSelectCylinder').value = cid;
-          updateMovementUI();
-        }, 500);
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // HERO & UI RENDERING
-    // ════════════════════════════════════════════════════════════════
-    function renderHero() {
-      const html = WC.ui.renderHero({
-        title: '🫁 Controle de Gases',
-        subtitle: WC.ui.formatDate(new Date()),
-        rightLink: { url: WC.config.BASE_URL, text: '← Portal' }
-      });
-      document.getElementById('heroContainer').innerHTML = html;
-    }
-
-    function setResponsavel() {
-      const name = WC.auth.getDisplayName();
-      document.getElementById('valveResponsavel').value = name;
-      document.getElementById('moveResponsavel').value = name;
-      document.getElementById('nfResponsavel').value = name;
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // TAB MANAGEMENT
-    // ════════════════════════════════════════════════════════════════
-    function showTab(tabName) {
-      // Hide all tabs
-      document.querySelectorAll('.tab-content').forEach(el => {
-        el.classList.remove('active');
-      });
-      document.querySelectorAll('.wc-tab').forEach(el => {
-        el.classList.remove('wc-tab--active');
-      });
-
-      // Show selected tab
-      const tabEl = document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
-      if (tabEl) {
-        tabEl.classList.add('active');
-      }
-
-      // Mark button active
-      event?.target?.classList?.add('wc-tab--active');
-
-      // Special handling for QR scanner
-      if (tabName === 'estoque') {
-        startQrScanner();
-      } else {
-        stopQrScanner();
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // CYLINDERS & ESTOQUE
-    // ════════════════════════════════════════════════════════════════
-    function initCylinders() {
-      const select = document.getElementById('moveSelectCylinder');
-      select.innerHTML = '<option value="">Escanear QR ou selecionar...</option>';
-      WC.config.CILINDROS.forEach(cil => {
-        const opt = document.createElement('option');
-        opt.value = cil.id;
-        opt.textContent = `${cil.id} — ${cil.tipo} (${cil.capacidade})`;
-        select.appendChild(opt);
-      });
-    }
-
-    async function loadEstoque() {
-      try {
-        const data = await WC.api.get(WC.config.API_GASES, {
-          action: 'dashboard',
-          key: 'wellclinic2026admin'
-        });
-
-        if (data && data.estoque && data.estoque.cilindros) {
-          renderEstoqueGrid(data.estoque.cilindros);
-        }
-      } catch (e) {
-        console.error('Erro ao carregar estoque:', e);
-        WC.ui.toast('Erro ao carregar estoque', 'error');
-      }
-    }
-
-    function renderEstoqueGrid(cilindros) {
-      const grid = document.getElementById('estoque-grid');
-      grid.innerHTML = '';
-
-      cilindros.forEach(cil => {
-        const card = document.createElement('div');
-        card.className = 'cylinder-card';
-        card.innerHTML = `
-          <div class="cylinder-id">${cil.id}</div>
-          <div class="cylinder-tipo">${cil.tipo}</div>
-          <span class="wc-pill wc-pill--${getStatusPill(cil.status || 'Vazio')}">${cil.status || 'Vazio'}</span>
-        `;
-        card.addEventListener('click', () => {
-          selectedCylinder = cil.id;
-          document.getElementById('moveSelectCylinder').value = cil.id;
-          updateMovementUI();
-          showTab('movimentacao');
-        });
-        grid.appendChild(card);
-      });
-    }
-
-    function getStatusPill(status) {
-      const map = {
-        'Cheio': 'cheio',
-        'Em uso': 'parcial',
-        'Vazio': 'vazio',
-        'Reserva': 'pendente'
-      };
-      return map[status] || 'vazio';
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // QR CODE SCANNER
-    // ════════════════════════════════════════════════════════════════
-    function startQrScanner() {
-      if (qrScannerStarted) return;
-
-      const qrReader = document.getElementById('qr-reader');
-      if (!qrReader) return;
-
-      qrScannerStarted = true;
-      qrScanner = new Html5Qrcode('qr-reader');
-
-      qrScanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        onQrCodeSuccess,
-        () => {} // ignore errors
-      ).catch(err => console.warn('QR Scanner:', err));
-    }
-
-    function stopQrScanner() {
-      if (qrScanner && qrScannerStarted) {
-        qrScanner.stop().catch(() => {});
-        qrScannerStarted = false;
-      }
-    }
-
-    function onQrCodeSuccess(decodedText) {
-      const cylinderId = decodedText.trim();
-      const found = WC.config.CILINDROS.find(c => c.id === cylinderId);
-
-      if (found) {
-        selectedCylinder = cylinderId;
-        document.getElementById('qrCylinderDisplay').textContent = cylinderId;
-        document.getElementById('qrResult').style.display = 'block';
-        WC.ui.toast(`Cilindro ${cylinderId} selecionado!`, 'success');
-        stopQrScanner();
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // VALVE OPERATIONS
-    // ════════════════════════════════════════════════════════════════
-    function startValve(action) {
-      selectedValveAction = action;
-      document.getElementById('valveAction').value = action;
-      updateValveUI();
-      showTab('valvulas');
-    }
-
-    function updateValveUI() {
-      const action = document.getElementById('valveAction').value;
-      if (action === 'abertura') {
-        document.getElementById('valveTitle').textContent = 'Abertura de Válvulas';
-        document.getElementById('valveSubtitle').textContent = 'Registre a abertura de cilindros para o dia';
-        document.querySelector('.valve-header').classList.remove('closing');
-      } else if (action === 'fechamento') {
-        document.getElementById('valveTitle').textContent = 'Fechamento de Válvulas';
-        document.getElementById('valveSubtitle').textContent = 'Registre o fechamento de cilindros ao final do dia';
-        document.querySelector('.valve-header').classList.add('closing');
-      }
-
-      // Set current datetime
-      const now = new Date();
-      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-      document.getElementById('valveDateTime').value = local.toISOString().slice(0, 16);
-    }
-
-    function toggleCheckbox(el) {
-      el.classList.toggle('checked');
-      const checkbox = el.querySelector('input[type="checkbox"]');
-      if (checkbox) checkbox.checked = !checkbox.checked;
-    }
-
-    function clearValveSignature() {
-      if (valveSignature) {
-        valveSignature.clear();
-      }
-    }
-
-    async function submitValve() {
-      const action = document.getElementById('valveAction').value;
-      const datetime = document.getElementById('valveDateTime').value;
-      const valvulas = Array.from(document.querySelectorAll('input[name="valve"]:checked')).map(v => v.value).join(',');
-      const observacao = document.getElementById('valveObservacao').value;
-      const responsavel = document.getElementById('valveResponsavel').value;
-
-      if (!action || !valvulas || !responsavel) {
-        WC.ui.toast('Preencha todos os campos obrigatórios', 'error');
-        return;
-      }
-
-      const sigData = valveSignature?.toDataURL?.() || '';
-      if (!sigData || sigData === 'data:image/png;base64,') {
-        WC.ui.toast('Assine para confirmar a operação', 'error');
-        return;
-      }
-
-      // Build checklist
-      const checklistItems = [];
-      document.querySelectorAll('.checklist-item:checked').forEach(item => {
-        checklistItems.push(item.value);
-      });
-
-      WC.ui.showLoading('Registrando operação...');
-
-      try {
-        const payload = {
-          tipo_registro: 'valvula',
-          data: datetime,
-          responsavel: responsavel,
-          acao: action,
-          valvulas: valvulas,
-          observacao: observacao,
-          assinatura_base64: sigData,
-          checklist_json: JSON.stringify(checklistItems)
-        };
-
-        const resp = await WC.api.postAuth(WC.config.API_GASES, payload);
-        WC.ui.hideLoading();
-
-        if (resp.status === 'ok') {
-          WC.ui.toast('Operação registrada com sucesso!', 'success');
-          document.getElementById('valveForm').reset();
-          clearValveSignature();
-          loadHistory();
-          showTab('estoque');
-        } else {
-          throw new Error(resp.msg || 'Erro ao registrar');
-        }
-      } catch (e) {
-        WC.ui.hideLoading();
-        WC.ui.toast(e.message || 'Erro ao registrar operação', 'error');
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // MOVEMENT OPERATIONS
-    // ════════════════════════════════════════════════════════════════
-    function startMovement() {
-      showTab('movimentacao');
-    }
-
-    function updateMovementUI() {
-      const cylinderId = document.getElementById('moveSelectCylinder').value;
-      const cyl = WC.config.CILINDROS.find(c => c.id === cylinderId);
-
-      if (cyl) {
-        document.getElementById('moveGasType').value = cyl.tipo;
-        document.getElementById('moveCapacity').value = cyl.capacidade;
-      } else {
-        document.getElementById('moveGasType').value = '';
-        document.getElementById('moveCapacity').value = '';
-      }
-    }
-
-    function selectAction(btn, action) {
-      document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('selected', 'danger'));
-      btn.classList.add('selected');
-      if (action === 'Retirada') {
-        btn.classList.add('danger');
-      }
-      selectedMovementAction = action;
-    }
-
-    function handlePhoto(inputId, previewId) {
-      const input = document.getElementById(inputId);
-      const preview = document.getElementById(previewId);
-      const file = input.files[0];
-
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = preview.querySelector('img');
-        img.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function clearPhoto(inputId, previewId) {
-      document.getElementById(inputId).value = '';
-      document.getElementById(previewId).style.display = 'none';
-    }
-
-    function handleAuthSuccess() {
-      window.location.href = WC.config.BASE_URL;
-    }
-
-    async function submitMovement() {
-      const cylinderId = document.getElementById('moveSelectCylinder').value;
-      const location = document.getElementById('moveLocation').value;
-      const otherLoc = document.getElementById('moveOtherLocation').value;
-      const status = document.getElementById('moveStatus').value;
-      const observacao = document.getElementById('moveObservacao').value;
-      const responsavel = document.getElementById('moveResponsavel').value;
-
-      if (!cylinderId || !selectedMovementAction || !location || !status || !responsavel) {
-        WC.ui.toast('Preencha todos os campos obrigatórios', 'error');
-        return;
-      }
-
-      const finalLocation = location === 'Outro' ? otherLoc : location;
-      const sigData = moveSignature?.toDataURL?.() || '';
-      if (!sigData || sigData === 'data:image/png;base64,') {
-        WC.ui.toast('Assine para confirmar', 'error');
-        return;
-      }
-
-      let photoData = '';
-      const photoInput = document.getElementById('movePhotoInput');
-      if (photoInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          photoData = reader.result;
-          await doSubmitMovement(cylinderId, finalLocation, status, sigData, photoData, responsavel, observacao);
-        };
-        reader.readAsDataURL(photoInput.files[0]);
-      } else {
-        await doSubmitMovement(cylinderId, finalLocation, status, sigData, photoData, responsavel, observacao);
-      }
-    }
-
-    async function doSubmitMovement(cylinderId, finalLocation, status, sigData, photoData, responsavel, observacao) {
-      const cyl = WC.config.CILINDROS.find(c => c.id === cylinderId);
-
-      WC.ui.showLoading('Registrando movimentação...');
-
-      try {
-        const payload = {
-          tipo_registro: 'movimentacao',
-          cilindro_id: cylinderId,
-          tipo_gas: cyl.tipo,
-          capacidade: cyl.capacidade,
-          acao: selectedMovementAction,
-          localizacao: finalLocation,
-          status_novo: status,
-          responsavel: responsavel,
-          observacao: observacao,
-          foto_base64: photoData,
-          assinatura_base64: sigData
-        };
-
-        const resp = await WC.api.postAuth(WC.config.API_GASES, payload);
-        WC.ui.hideLoading();
-
-        if (resp.status === 'ok') {
-          WC.ui.toast('Movimentação registrada com sucesso!', 'success');
-          document.getElementById('movementForm').reset();
-          clearMoveSignature();
-          clearPhoto('movePhotoInput', 'movePhotoPreview');
-          loadHistory();
-          loadEstoque();
-          showTab('estoque');
-        } else {
-          throw new Error(resp.msg || 'Erro ao registrar');
-        }
-      } catch (e) {
-        WC.ui.hideLoading();
-        WC.ui.toast(e.message || 'Erro ao registrar movimento', 'error');
-      }
-    }
-
-    function clearMoveSignature() {
-      if (moveSignature) {
-        moveSignature.clear();
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // INVOICE OPERATIONS
-    // ════════════════════════════════════════════════════════════════
-    function startInvoice() {
-      showTab('notas_fiscais');
-    }
-
-    function addInvoiceItem() {
-      invoiceItemCount++;
-      const container = document.getElementById('nfItems');
-      const item = document.createElement('div');
-      item.className = 'invoice-item';
-      item.id = `nfItem_${invoiceItemCount}`;
-      item.innerHTML = `
-        <button type="button" class="invoice-item__remove" onclick="removeInvoiceItem(${invoiceItemCount})">×</button>
-        <div class="wc-form-group">
-          <select class="wc-select" data-field="tipo">
-            <option value="">Selecione tipo de gás</option>
-            ${WC.config.TIPOS_GAS_NF.map(t => `<option value="${t}">${t}</option>`).join('')}
-          </select>
-        </div>
-        <div class="wc-form-group">
-          <input type="number" class="wc-input" data-field="qtd" placeholder="Qtd cilindros" min="1">
-        </div>
-        <div class="wc-form-group">
-          <input type="text" class="wc-input" data-field="valor" placeholder="Valor total">
-        </div>
-      `;
-      container.appendChild(item);
-    }
-
-    function removeInvoiceItem(id) {
-      const item = document.getElementById(`nfItem_${id}`);
-      if (item) item.remove();
-    }
-
-    async function submitInvoice() {
-      const numero = document.getElementById('nfNumero').value;
-      const fornecedor = document.getElementById('nfFornecedor').value;
-      const data = document.getElementById('nfData').value;
-      const observacao = document.getElementById('nfObservacao').value;
-      const responsavel = document.getElementById('nfResponsavel').value;
-
-      if (!numero || !fornecedor || !data || !responsavel) {
-        WC.ui.toast('Preencha todos os campos obrigatórios', 'error');
-        return;
-      }
-
-      // Collect items
-      const itens = [];
-      document.querySelectorAll('.invoice-item').forEach(itemEl => {
-        const tipo = itemEl.querySelector('[data-field="tipo"]').value;
-        const qtd = itemEl.querySelector('[data-field="qtd"]').value;
-        const valor = itemEl.querySelector('[data-field="valor"]').value;
-
-        if (tipo && qtd && valor) {
-          itens.push({
-            tipo_gas: tipo,
-            qtd_cilindros: parseInt(qtd),
-            valor_total: parseFloat(valor)
-          });
-        }
-      });
-
-      if (itens.length === 0) {
-        WC.ui.toast('Adicione pelo menos um item', 'error');
-        return;
-      }
-
-      WC.ui.showLoading('Registrando nota fiscal...');
-
-      try {
-        const payload = {
-          tipo_registro: 'nota_fiscal',
-          numero_nf: numero,
-          fornecedor: fornecedor,
-          data_nf: data,
-          itens: itens,
-          observacao: observacao,
-          responsavel: responsavel
-        };
-
-        const resp = await WC.api.postAuth(WC.config.API_GASES, payload);
-        WC.ui.hideLoading();
-
-        if (resp.status === 'ok') {
-          WC.ui.toast('Nota fiscal registrada com sucesso!', 'success');
-          document.getElementById('invoiceForm').reset();
-          document.getElementById('nfItems').innerHTML = '';
-          invoiceItemCount = 0;
-          loadHistory();
-          showTab('estoque');
-        } else {
-          throw new Error(resp.msg || 'Erro ao registrar');
-        }
-      } catch (e) {
-        WC.ui.hideLoading();
-        WC.ui.toast(e.message || 'Erro ao registrar nota fiscal', 'error');
-      }
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // HISTORY & SIGNATURE
-    // ════════════════════════════════════════════════════════════════
-    async function loadHistory() {
-      try {
-        const data = await WC.api.get(WC.config.API_GASES, {
-          action: 'history',
-          key: 'wellclinic2026admin',
-          limit: 10
-        });
-
-        if (data && data.recent) {
-          renderHistory(data.recent);
-        }
-      } catch (e) {
-        console.warn('Erro ao carregar histórico:', e);
-      }
-    }
-
-    function renderHistory(items) {
-      const container = document.getElementById('history-container');
-      if (!items || items.length === 0) {
-        container.innerHTML = `
-          <div class="history-empty">
-            <div class="history-empty__icon">📭</div>
-            <div>Nenhuma atividade registrada</div>
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = items.map(item => `
-        <div class="history-item">
-          <div class="history-header">
-            <span class="history-type">${getHistoryIcon(item.tipo_registro)} ${capitalizeFirst(item.tipo_registro)}</span>
-            <span class="history-time">${WC.ui.formatDateShort(item.data)}</span>
-          </div>
-          <div class="history-detail">
-            ${getHistoryDetail(item)}
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function getHistoryIcon(type) {
-      const icons = {
-        'valvula': '🔓',
-        'movimentacao': '📦',
-        'nota_fiscal': '📄'
-      };
-      return icons[type] || '📝';
-    }
-
-    function getHistoryDetail(item) {
-      if (item.tipo_registro === 'valvula') {
-        return `${item.acao} de ${item.valvulas} por ${item.responsavel}`;
-      } else if (item.tipo_registro === 'movimentacao') {
-        return `${item.acao} de ${item.cilindro_id} → ${item.localizacao} (${item.status_novo})`;
-      } else if (item.tipo_registro === 'nota_fiscal') {
-        return `NF ${item.numero_nf} — ${item.fornecedor}`;
-      }
-      return '';
-    }
-
-    function capitalizeFirst(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    function initSignatures() {
-      valveSignature = WC.ui.setupSignature('valveSignature');
-      moveSignature = WC.ui.setupSignature('moveSignature');
-    }
-
-    // ════════════════════════════════════════════════════════════════
-    // STARTUP
-    // ════════════════════════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', init);
-
-    // Handle location selection change
-    document.addEventListener('DOMContentLoaded', () => {
-      const locationSelect = document.getElementById('moveLocation');
-      if (locationSelect) {
-        locationSelect.addEventListener('change', (e) => {
-          const otherDiv = document.getElementById('moveOtherLocDiv');
-          if (e.target.value === 'Outro') {
-            otherDiv.classList.remove('wc-hidden');
-          } else {
-            otherDiv.classList.add('wc-hidden');
-          }
-        });
-      }
-    });
-  </script>
+<!-- Auth Overlays from shared UI -->
+<div id="wcLoading" class="wc-loading"><div class="wc-loading__spinner"></div><div class="wc-loading__text">Carregando...</div></div>
+<div id="wcLogin" class="wc-login"><div class="wc-login__box"><div style="font-size:32px;margin-bottom:12px;">🏥</div><div class="wc-login__title">Well Clinic</div><div class="wc-login__subtitle">Controle de Gases</div><div class="wc-form-group"><input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email"></div><div class="wc-form-group"><input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric" maxlength="4"></div><button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button><div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div><div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div></div></div>
+<div id="wcRegister" class="wc-register"><div class="wc-login__box"><div style="font-size:32px;margin-bottom:12px;">👋</div><div class="wc-login__title">Bem-vindo!</div><div class="wc-login__subtitle" id="registerSubtitle">Configure seu acesso</div><div class="wc-form-group"><label class="wc-label">Como quer ser chamado?</label><input type="text" id="registerApelido" class="wc-input" placeholder="Ex: Jonatã, Dra. Jaque, Gabi..."></div><div class="wc-form-group"><label class="wc-label">Crie uma senha (4+ dígitos)</label><input type="password" id="registerPin" class="wc-input" placeholder="Sua senha" inputmode="numeric"></div><div class="wc-form-group"><label class="wc-label">Confirme a senha</label><input type="password" id="registerPinConfirm" class="wc-input" placeholder="Repita a senha" inputmode="numeric"></div><button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnRegister">Criar Acesso</button><div id="registerError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div></div></div>
+
+<!-- HEADER -->
+<div style="background:linear-gradient(135deg,var(--azul),var(--azul-medio));color:#fff;position:sticky;top:0;z-index:100;overflow:hidden;padding:20px;"><div style="position:relative;"><button class="wc-btn wc-btn--outline" id="backBtn" onclick="goHome()" style="position:absolute;left:0;top:50%;transform:translateY(-50%);width:40px;height:40px;padding:0;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:18px;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.08);cursor:pointer;transition:all .3s;">←</button><a class="wc-hero-link" id="portalLink" href="https://jotash24-sys.github.io/wellclinic-portal/" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;">← Portal</a><button id="logoutBtn" onclick="handleLogout()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);color:#fff;padding:8px 12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;font-size:11px;font-weight:500;cursor:pointer;transition:all .3s;display:none;">Sair</button><div style="text-align:center;"><div style="font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;text-align:center;">Well Clinic</div><h1 style="font-family:var(--font-titulo);font-size:17px;font-weight:600;text-align:center;letter-spacing:.5px;margin:0;">Controle de Gases Medicinais</h1><div style="width:32px;height:2px;background:linear-gradient(90deg,transparent,var(--dourado-claro),transparent);margin:6px auto 4px;"></div><div style="font-size:11px;font-weight:300;text-align:center;opacity:.6;letter-spacing:1px;">Sistema de Registro e Rastreabilidade</div><div style="font-size:12px;text-align:center;margin-top:8px;opacity:.8;" id="headerUser"></div></div></div></div>
+
+<div class="wc-container">
+
+<!-- HOME -->
+<div class="screen active" id="screenHome"><div class="home-greeting"><h2>O que deseja registrar?</h2><p>Selecione a operação abaixo</p></div><div class="home-menu"><div class="menu-btn menu-open animate-in delay-1" onclick="startValve('abertura')"><div class="menu-stripe"></div><div class="menu-content"><div class="menu-icon">🔓</div><div class="menu-text"><h3>Abertura de Válvulas</h3><p>Registre a abertura no início do expediente. Obrigatório para rastreabilidade.</p></div></div><div class="menu-arrow">›</div></div><div class="menu-btn menu-close animate-in delay-2" onclick="startValve('fechamento')"><div class="menu-stripe"></div><div class="menu-content"><div class="menu-icon">🔒</div><div class="menu-text"><h3>Fechamento de Válvulas</h3><p>Registre o fechamento ao final do dia. Garante a segurança dos cilindros.</p></div></div><div class="menu-arrow">›</div></div><div class="menu-btn menu-move animate-in delay-3" onclick="startMove()"><div class="menu-stripe"></div><div class="menu-content"><div class="menu-icon">🔄</div><div class="menu-text"><h3>Movimentação de Cilindros</h3><p>Escaneie o QR Code para registrar troca, reposição ou retirada.</p></div></div><div class="menu-arrow">›</div></div><div class="menu-btn menu-nf animate-in delay-4" id="menuNf" onclick="showScreen('nf')"><div class="menu-stripe"></div><div class="menu-content"><div class="menu-icon">📄</div><div class="menu-text"><h3>Registrar Nota Fiscal</h3><p>Vincule notas fiscais de compra aos cilindros para controle de custos.</p></div></div><div class="menu-arrow">›</div></div></div><div class="footer"><div class="footer-divider"></div><div class="footer-brand">Well Clinic</div><div class="footer-sub">Gases Medicinais · Rastreabilidade · Auditoria</div><div class="footer-dev">Desenvolvido por Jonatã Schneider</div></div></div>
+
+<!-- VALVE -->
+<div class="screen" id="screenValve"><div class="valve-header animate-in" id="valveHeader"><div class="valve-icon" id="valveIcon">🔓</div><h2 id="valveTitle">Abertura de Válvulas</h2><p id="valveSubtitle">Marque cada válvula após a abertura</p></div><div class="wc-user-badge animate-in delay-1"><span class="wc-user-badge__avatar">👤</span><span class="wc-user-badge__name" id="valveUserBadge">—</span><span class="wc-user-badge__role">Responsável</span></div><input type="hidden" id="valveOperador"><div class="card animate-in delay-2"><div class="card-title"><span class="step">1</span> Válvulas</div><label style="margin-bottom:12px;font-size:12px;">Toque em cada válvula conforme operar:</label><div class="valve-list" id="valveList"><div class="valve-item" data-valve="Sala 8 — Oxigênio" onclick="toggleValve(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name">Oxigênio</div><div class="valve-loc">📍 Sala 8</div></div></div><div class="valve-item" data-valve="Sala 8 — Nitroso" onclick="toggleValve(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name">Óxido Nitroso</div><div class="valve-loc">📍 Sala 8</div></div></div><div class="valve-item" data-valve="Armário Externo — Oxigênio" onclick="toggleValve(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name">Oxigênio</div><div class="valve-loc">📍 Armário Externo</div></div></div><div class="valve-item" data-valve="Armário Externo — Nitroso" onclick="toggleValve(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name">Óxido Nitroso</div><div class="valve-loc">📍 Armário Externo</div></div></div><div class="valve-item" data-valve="Esterilização — Oxigênio" onclick="toggleValve(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name">Oxigênio</div><div class="valve-loc">📍 Esterilização</div></div></div></div></div><div class="card animate-in delay-3"><div class="card-title"><span class="step">2</span> Observação <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(opcional)</span></div><div class="field"><input type="text" id="valveObs" placeholder="Ex: válvula com dificuldade" class="wc-input"></div></div><button class="submit-btn" id="valveSubmitBtn" onclick="confirmValve()" disabled><span class="spinner" id="valveSpinner"></span><span id="valveSubmitText">Registrar</span></button><div class="error-msg" id="valveErrorMsg"></div><div class="footer"><div class="footer-divider"></div><div class="footer-brand">Well Clinic</div><div class="footer-dev">Desenvolvido por Jonatã Schneider</div></div></div>
+
+<!-- SCAN -->
+<div class="screen" id="screenScan"><div style="background:var(--branco);border-radius:var(--radius);box-shadow:var(--sombra-md);border:1px solid var(--cinza-leve);padding:24px;text-align:center;" class="animate-in"><h2 style="font-family:var(--font-titulo);font-size:20px;font-weight:600;color:var(--azul);margin-bottom:6px;">📷 Escaneie o QR Code</h2><p style="font-size:13px;color:var(--cinza-texto);margin-bottom:16px;">Aponte a câmera para o QR Code fixado no cilindro</p><div id="qrReader" style="width:100%;border-radius:12px;overflow:hidden;"></div><p id="qrStatus" style="font-size:12px;color:var(--cinza-texto);margin-top:12px;">Aguardando câmera...</p><div id="qrManual" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--cinza-leve);"><p style="font-size:12px;color:var(--cinza-texto);margin-bottom:10px;">Ou selecione manualmente:</p><select id="manualCylinder" class="wc-select" onchange="manualSelectCylinder(this.value)" style="width:100%;padding:12px;border-radius:var(--radius-sm);border:1px solid var(--cinza-leve);font-family:var(--font-corpo);font-size:14px;background:var(--marfim);color:var(--grafite);"><option value="">Escolha o cilindro...</option><option value="nitroso1">Nitroso 1 — Óxido Nitroso 33kg</option><option value="nitroso2">Nitroso 2 — Óxido Nitroso 33kg</option><option value="nitroso3">Nitroso 3 — Óxido Nitroso 33kg</option><option value="nitroso4">Nitroso 4 — Óxido Nitroso 7kg</option><option value="oxigenio1">Oxigênio 1 — 10m³</option><option value="oxigenio2">Oxigênio 2 — 10m³</option><option value="oxigenio3">Oxigênio 3 — 10m³</option><option value="oxigenio4">Oxigênio 4 — 10m³</option><option value="oxigenio5">Oxigênio 5 — 10m³</option><option value="oxigenio6">Oxigênio 6 — 1,5m³</option><option value="oxigenio7">Oxigênio 7 — 1,5m³</option><option value="oxigenio8">Oxigênio 8 — 1,5m³</option></select></div></div><div class="footer"><div class="footer-divider"></div><div class="footer-brand">Well Clinic</div><div class="footer-dev">Desenvolvido por Jonatã Schneider</div></div></div>
+
+<!-- MOVEMENT -->
+<div class="screen" id="screenMove"><div class="cyl-banner animate-in" id="cylBanner"><span class="cyl-tag" id="cylTag">—</span><div class="cyl-id" id="cylId">—</div><div class="cyl-cap" id="cylCap">—</div></div><div class="wc-user-badge animate-in delay-1"><span class="wc-user-badge__avatar">👤</span><span class="wc-user-badge__name" id="moveUserBadge">—</span><span class="wc-user-badge__role">Operador</span></div><input type="hidden" id="moveOperador"><div class="card animate-in delay-2"><div class="card-title"><span class="step">1</span> Ação</div><label style="margin-bottom:12px;font-size:12px;">O que está sendo feito?</label><div class="action-toggle"><button type="button" class="action-btn" data-action="Retirada (Vazio)" onclick="selectAction(this)"><span class="emoji">🔴</span>Retirar Vazio</button><button type="button" class="action-btn" data-action="Inserção (Cheio)" onclick="selectAction(this)"><span class="emoji">🟢</span>Inserir Cheio</button></div></div><div class="card animate-in delay-3"><div class="card-title"><span class="step">2</span> Localização</div><label style="margin-bottom:12px;font-size:12px;">Ponto de instalação ou retirada:</label><div class="loc-grid"><button type="button" class="loc-btn" data-loc="Armário Externo" onclick="selectLocation(this)"><span class="loc-icon">🚪</span>Armário Externo</button><button type="button" class="loc-btn" data-loc="Sala 8" onclick="selectLocation(this)"><span class="loc-icon">🏥</span>Sala 8</button><button type="button" class="loc-btn" data-loc="Expurgo" onclick="selectLocation(this)"><span class="loc-icon">🧹</span>Expurgo</button><button type="button" class="loc-btn" data-loc="Esterilização" onclick="selectLocation(this)"><span class="loc-icon">🧫</span>Esterilização</button><button type="button" class="loc-btn" data-loc="Outra" onclick="selectLocation(this)" style="grid-column:span 2;"><span class="loc-icon">📍</span>Outra</button></div><div class="field" id="outraField" style="display:none;margin-top:12px;"><input type="text" id="outraLoc" placeholder="Informe a localização" class="wc-input"></div></div><div class="card" style="border-left:4px solid var(--terra);"><div class="card-title"><span class="step" style="background:linear-gradient(135deg,var(--terra),#D4765E);">3</span> Checklist de Segurança <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--terra);">(obrigatório)</span></div><label style="margin-bottom:12px;font-size:12px;">Confirme todos os itens:</label><div class="valve-list" id="safetyChecklist"><div class="valve-item" data-check="Válvula de saída fechada" onclick="toggleSafety(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name" style="font-size:13px;">Válvula de saída fechada</div><div class="valve-loc">Antes de iniciar a troca</div></div></div><div class="valve-item" data-check="Conexão verificada e firme" onclick="toggleSafety(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name" style="font-size:13px;">Conexão verificada e firme</div><div class="valve-loc">Sem vazamento na rosca</div></div></div><div class="valve-item" data-check="Cilindro fixado no suporte" onclick="toggleSafety(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name" style="font-size:13px;">Cilindro fixado no suporte</div><div class="valve-loc">Preso com corrente ou braçadeira</div></div></div><div class="valve-item" data-check="Teste de vazamento realizado" onclick="toggleSafety(this)"><div class="valve-check">✓</div><div class="valve-info"><div class="valve-name" style="font-size:13px;">Teste de vazamento realizado</div><div class="valve-loc">Verificar som ou odor</div></div></div></div><div style="margin-top:12px;padding:10px 12px;background:var(--terra-bg);border-radius:8px;font-size:11px;color:var(--terra);border:1px solid rgba(184,92,74,.15);">⚠️ Todos os itens devem ser marcados.</div></div><div class="card"><div class="card-title"><span class="step">4</span> Foto do Manômetro <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(recomendado)</span></div><div class="photo-area" id="photoArea" onclick="document.getElementById('photoInput').click()"><div class="cam-icon">📸</div><p>Toque para fotografar o manômetro</p></div><input type="file" accept="image/*" capture="environment" class="photo-input" id="photoInput" onchange="handlePhoto(this)"><img class="photo-preview" id="photoPreview"><div class="photo-actions" id="photoActions"><button onclick="clearPhoto()">Remover foto</button></div></div><div class="card"><div class="card-title"><span class="step">5</span> Assinatura do Operador <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(obrigatório)</span></div><div class="sig-container" id="sigContainer"><canvas id="sigCanvas" width="600" height="200"></canvas><div class="sig-placeholder" id="sigPlaceholder">✍️ Assine com o dedo aqui</div></div><div class="sig-actions"><button onclick="clearSig()">Limpar</button></div></div><div class="card"><div class="card-title"><span class="step">6</span> Observação <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(opcional)</span></div><div class="field"><input type="text" id="moveObs" placeholder="Ex: cilindro com avaria" class="wc-input"></div></div><button class="submit-btn" id="moveSubmitBtn" onclick="confirmMove()" disabled><span class="spinner" id="moveSpinner"></span><span id="moveSubmitText">Registrar Movimentação</span></button><div class="error-msg" id="moveErrorMsg"></div><div class="last-record" id="lastRecord" style="display:none;"><strong>Último registro:</strong><br><span id="lastRecordText"></span></div><div class="footer"><div class="footer-divider"></div><div class="footer-brand">Well Clinic</div><div class="footer-dev">Desenvolvido por Jonatã Schneider</div></div></div>
+
+<!-- NF -->
+<div class="screen" id="screenNf"><div style="background:linear-gradient(135deg,var(--terra),#D4765E);border-radius:var(--radius);box-shadow:var(--sombra-forte);padding:28px 20px;margin-bottom:16px;text-align:center;color:#fff;" class="animate-in"><div style="font-size:38px;margin-bottom:10px;">📄</div><h2 style="font-family:var(--font-titulo);font-size:22px;font-weight:600;">Registrar Nota Fiscal</h2><p style="font-size:13px;opacity:.7;margin-top:4px;">Vincule NFs de compra para controle de custos</p></div><div class="card animate-in delay-1"><div class="card-title"><span class="step">1</span> Dados da NF</div><div class="field"><label>Número da NF</label><input type="text" id="nfNumero" placeholder="Ex: 2333261" class="wc-input"></div><div class="field"><label>Fornecedor</label><input type="text" id="nfFornecedor" placeholder="Ex: Henry Schein / White Martins" class="wc-input"></div><div class="field"><label>Data da NF</label><input type="date" id="nfData" class="wc-input"></div></div><div class="card animate-in delay-2"><div class="card-title"><span class="step">2</span> Itens</div><label style="margin-bottom:12px;font-size:12px;">Adicione cada tipo de gás da nota:</label><div id="nfItens"><div class="nf-item-row" data-idx="0"><select id="nfGas0" class="wc-select"><option value="">Tipo de gás</option><option value="Óxido Nitroso — 33kg">Óxido Nitroso — 33kg</option><option value="Óxido Nitroso — 7kg">Óxido Nitroso — 7kg</option><option value="Oxigênio — 10m³">Oxigênio — 10m³</option><option value="Oxigênio — 1,5m³">Oxigênio — 1,5m³</option></select><input type="number" id="nfQtd0" placeholder="Qtd" min="0" class="wc-input"><input type="number" id="nfValor0" placeholder="R$ Total" min="0" step="0.01" class="wc-input"></div></div><button class="add-item-btn" onclick="addNfItem()">+ Adicionar item</button></div><div class="card animate-in delay-3"><div class="card-title"><span class="step">3</span> Observação <span style="font-weight:300;text-transform:none;letter-spacing:0;color:var(--cinza-texto);">(opcional)</span></div><div class="field"><input type="text" id="nfObs" placeholder="Ex: entrega parcial" class="wc-input"></div></div><button class="submit-btn" id="nfSubmitBtn" onclick="confirmNf()" style="background:linear-gradient(135deg,var(--terra),#D4765E);" disabled><span class="spinner" id="nfSpinner"></span><span id="nfSubmitText">Registrar Nota Fiscal</span></button><div class="error-msg" id="nfErrorMsg"></div><div class="footer"><div class="footer-divider"></div><div class="footer-brand">Well Clinic</div><div class="footer-dev">Desenvolvido por Jonatã Schneider</div></div></div>
+
+</div><!-- /container -->
+
+<!-- CONFIRM -->
+<div class="feedback" id="confirmModal"><div class="feedback-box"><h3 id="confirmTitle">Confirmar?</h3><div class="confirm-summary" id="confirmSummary"></div><div class="modal-actions"><button id="confirmBtn" onclick="submitCurrent()">Confirmar e Registrar</button><button class="btn-secondary" onclick="closeConfirm()">Voltar e Corrigir</button></div></div></div>
+
+<!-- SUCCESS -->
+<div class="feedback" id="successModal"><div class="feedback-box"><div class="check">✓</div><h3>Registro Concluído</h3><p id="successText"></p><div class="modal-actions"><button onclick="goHome()">Voltar ao Início</button></div></div></div>
+
+<script>
+// CONFIG
+const CILINDROS={nitroso1:{id:'Nitroso 1',tipo:'Óxido Nitroso',capacidade:'33kg'},nitroso2:{id:'Nitroso 2',tipo:'Óxido Nitroso',capacidade:'33kg'},nitroso3:{id:'Nitroso 3',tipo:'Óxido Nitroso',capacidade:'33kg'},nitroso4:{id:'Nitroso 4',tipo:'Óxido Nitroso',capacidade:'7kg'},oxigenio1:{id:'Oxigênio 1',tipo:'Oxigênio',capacidade:'10m³'},oxigenio2:{id:'Oxigênio 2',tipo:'Oxigênio',capacidade:'10m³'},oxigenio3:{id:'Oxigênio 3',tipo:'Oxigênio',capacidade:'10m³'},oxigenio4:{id:'Oxigênio 4',tipo:'Oxigênio',capacidade:'10m³'},oxigenio5:{id:'Oxigênio 5',tipo:'Oxigênio',capacidade:'10m³'},oxigenio6:{id:'Oxigênio 6',tipo:'Oxigênio',capacidade:'1,5m³'},oxigenio7:{id:'Oxigênio 7',tipo:'Oxigênio',capacidade:'1,5m³'},oxigenio8:{id:'Oxigênio 8',tipo:'Oxigênio',capacidade:'1,5m³'}};
+let currentCylinder=null,selectedAction=null,selectedLocation=null,currentValveMode=null,pendingPayload=null;
+let sigCanvas,sigCtx,sigDrawing=false,sigHasData=false;
+let photoBase64=null;
+let nfItemCount=1;
+let qrScanner=null;
+
+// INIT
+async function init(){const authResult=await WC.auth.init();if(authResult.registration){WC.ui.bindAuthEvents();return;}if(!authResult.authenticated){WC.ui.bindAuthEvents(()=>window.location.reload());return;}const session=authResult.session;const params=new URLSearchParams(window.location.search);const cid=params.get('cid');if(cid&&CILINDROS[cid]){currentCylinder=CILINDROS[cid];initSignature();showApp(session);showScreen('move');setupMoveForm();}else{showApp(session);}}
+function showApp(session){document.getElementById('wcLogin').classList.remove('show');document.getElementById('wcRegister').classList.remove('show');document.getElementById('logoutBtn').style.display='block';document.getElementById('headerUser').textContent=`Olá, ${session.nome||session.user?.nome||'Usuário'}`;updateUIForRole(session);showScreen('home');}
+function updateUIForRole(session){const isGestor=session.perfil==='gestor'||(session.user&&session.user.perfil==='gestor');document.getElementById('menuNf').style.display=isGestor?'':'none';}
+function handleLogout(){WC.auth.logout();}
+
+// SCREENS
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const screenMap={home:'screenHome',valve:'screenValve',scan:'screenScan',move:'screenMove',nf:'screenNf'};const screenId=screenMap[n];if(screenId)document.getElementById(screenId).classList.add('active');document.getElementById('backBtn').style.display=n!=='home'?'flex':'none';document.getElementById('portalLink').style.display=n!=='home'?'none':'block';window.scrollTo(0,0);}
+function goHome(){stopQrScanner();selectedAction=null;selectedLocation=null;currentValveMode=null;currentCylinder=null;photoBase64=null;sigHasData=false;nfItemCount=1;document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected-out','selected-in'));document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('selected'));document.querySelectorAll('.valve-item').forEach(v=>v.classList.remove('checked'));document.querySelectorAll('#safetyChecklist .valve-item').forEach(v=>v.classList.remove('checked'));['outraField'].forEach(id=>{document.getElementById(id).style.display='none';});['outraLoc','moveObs','valveObs','nfNumero','nfFornecedor','nfData','nfObs'].forEach(id=>{document.getElementById(id).value='';});['moveSubmitBtn','valveSubmitBtn','nfSubmitBtn'].forEach(id=>{document.getElementById(id).disabled=true;});document.getElementById('successModal').classList.remove('show');document.getElementById('confirmModal').classList.remove('show');document.getElementById('photoPreview').style.display='none';document.getElementById('photoActions').style.display='none';document.getElementById('photoArea').style.display='';document.getElementById('nfItens').innerHTML='<div class="nf-item-row" data-idx="0"><select id="nfGas0"><option value="">Tipo de gás</option><option value="Óxido Nitroso — 33kg">Óxido Nitroso — 33kg</option><option value="Óxido Nitroso — 7kg">Óxido Nitroso — 7kg</option><option value="Oxigênio — 10m³">Oxigênio — 10m³</option><option value="Oxigênio — 1,5m³">Oxigênio — 1,5m³</option></select><input type="number" id="nfQtd0" placeholder="Qtd" min="0"><input type="number" id="nfValor0" placeholder="R$ Total" min="0" step="0.01"></div>';clearSig();window.history.replaceState({},'',window.location.pathname);showScreen('home');}
+
+// VALVE
+function startValve(mode){currentValveMode=mode;const h=document.getElementById('valveHeader'),btn=document.getElementById('valveSubmitBtn');if(mode==='abertura'){h.className='valve-header opening animate-in';document.getElementById('valveIcon').textContent='🔓';document.getElementById('valveTitle').textContent='Abertura de Válvulas';document.getElementById('valveSubtitle').textContent='Marque cada válvula após abertura';document.getElementById('valveSubmitText').textContent='Registrar Abertura';btn.className='submit-btn opening-btn';}else{h.className='valve-header closing animate-in';document.getElementById('valveIcon').textContent='🔒';document.getElementById('valveTitle').textContent='Fechamento de Válvulas';document.getElementById('valveSubtitle').textContent='Marque cada válvula após fechamento';document.getElementById('valveSubmitText').textContent='Registrar Fechamento';btn.className='submit-btn closing-btn';}const session=WC.auth.getSession();document.getElementById('valveOperador').value=session.nome||session.user?.nome||'—';document.getElementById('valveUserBadge').textContent=session.nome||session.user?.nome||'—';showScreen('valve');}
+function toggleValve(el){el.classList.toggle('checked');checkValveReady();}
+function checkValveReady(){document.getElementById('valveSubmitBtn').disabled=!(document.querySelectorAll('#valveList .valve-item.checked').length>0);}
+function confirmValve(){const op=document.getElementById('valveOperador').value.trim(),checked=Array.from(document.querySelectorAll('#valveList .valve-item.checked')).map(e=>e.dataset.valve),obs=document.getElementById('valveObs').value.trim();const lbl=currentValveMode==='abertura'?'🔓 Abertura':'🔒 Fechamento';let h=`<div class="row"><span class="label">Operação</span><span class="value">${lbl}</span></div><div class="row"><span class="label">Responsável</span><span class="value">${op}</span></div><div class="row"><span class="label">Válvulas</span><span class="value">${checked.length} de 5</span></div>`;checked.forEach(v=>{h+=`<div class="row"><span class="label"></span><span class="value" style="font-size:12px;color:var(--verde);">✓ ${v}</span></div>`;});if(obs)h+=`<div class="row"><span class="label">Obs</span><span class="value">${obs}</span></div>`;document.getElementById('confirmSummary').innerHTML=h;document.getElementById('confirmTitle').textContent=`Confirmar ${currentValveMode}?`;pendingPayload={tipo_registro:'valvula',operador:op,acao:currentValveMode==='abertura'?'Abertura':'Fechamento',valvulas:checked.join(', '),observacao:obs||'—',session_token:WC.auth.getSession()?.token||''};document.getElementById('confirmModal').classList.add('show');}
+
+// QR SCANNER
+function startMove(){showScreen('scan');startQrScanner();}
+function startQrScanner(){if(qrScanner)try{qrScanner.stop();}catch(e){}document.getElementById('qrStatus').textContent='Iniciando câmera...';document.getElementById('manualCylinder').value='';qrScanner=new Html5Qrcode('qrReader');qrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:250}},function(decodedText){handleQrResult(decodedText);},function(){}).then(function(){document.getElementById('qrStatus').textContent='Câmera ativa — aponte para o QR Code';}).catch(function(err){document.getElementById('qrStatus').textContent='Câmera indisponível — use a seleção manual abaixo';console.error('QR Scanner error:',err);});}
+function stopQrScanner(){if(qrScanner)try{qrScanner.stop();}catch(e){}}
+function handleQrResult(text){stopQrScanner();let cid=null;try{const url=new URL(text);cid=url.searchParams.get('cid');}catch(e){cid=text.trim().toLowerCase();}if(cid&&CILINDROS[cid]){currentCylinder=CILINDROS[cid];showScreen('move');setupMoveForm();initSignature();}else{document.getElementById('qrStatus').textContent='QR Code não reconhecido. Tente novamente.';document.getElementById('qrStatus').style.color='var(--terra)';setTimeout(function(){document.getElementById('qrStatus').style.color='';startQrScanner();},2000);}}
+function manualSelectCylinder(cid){if(!cid)return;stopQrScanner();if(CILINDROS[cid]){currentCylinder=CILINDROS[cid];showScreen('move');setupMoveForm();initSignature();}}
+function setupMoveForm(){const n=currentCylinder.tipo==='Óxido Nitroso';document.getElementById('cylBanner').className='cyl-banner animate-in '+(n?'n2o':'o2');document.getElementById('cylTag').textContent=currentCylinder.tipo;document.getElementById('cylId').textContent=currentCylinder.id;document.getElementById('cylCap').textContent='Capacidade: '+currentCylinder.capacidade;const session=WC.auth.getSession();document.getElementById('moveOperador').value=session.nome||session.user?.nome||'—';document.getElementById('moveUserBadge').textContent=session.nome||session.user?.nome||'—';}
+function selectAction(btn){document.querySelectorAll('.action-btn').forEach(b=>b.classList.remove('selected-out','selected-in'));selectedAction=btn.dataset.action;btn.classList.add(selectedAction.includes('Retirada')?'selected-out':'selected-in');checkMoveReady();}
+function selectLocation(btn){document.querySelectorAll('.loc-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');if(btn.dataset.loc==='Outra'){document.getElementById('outraField').style.display='block';selectedLocation=null;}else{document.getElementById('outraField').style.display='none';document.getElementById('outraLoc').value='';selectedLocation=btn.dataset.loc;}checkMoveReady();}
+function getLocation(){return selectedLocation||document.getElementById('outraLoc').value.trim()||null;}
+function toggleSafety(el){el.classList.toggle('checked');checkMoveReady();}
+function checkMoveReady(){const a=selectedAction,l=getLocation();const ct=document.querySelectorAll('#safetyChecklist .valve-item').length;const cd=document.querySelectorAll('#safetyChecklist .valve-item.checked').length;document.getElementById('moveSubmitBtn').disabled=!(a&&l&&cd===ct&&sigHasData);}
+document.getElementById('outraLoc').addEventListener('input',checkMoveReady);
+function confirmMove(){const op=document.getElementById('moveOperador').value.trim(),loc=getLocation(),obs=document.getElementById('moveObs').value.trim();const emoji=selectedAction.includes('Retirada')?'🔴':'🟢';const chk=Array.from(document.querySelectorAll('#safetyChecklist .valve-item.checked')).map(e=>e.dataset.check);let h='';h+=`<div class="row"><span class="label">Cilindro</span><span class="value">${currentCylinder.id}</span></div>`;h+=`<div class="row"><span class="label">Gás</span><span class="value">${currentCylinder.tipo}</span></div>`;h+=`<div class="row"><span class="label">Ação</span><span class="value">${emoji} ${selectedAction}</span></div>`;h+=`<div class="row"><span class="label">Local</span><span class="value">${loc}</span></div>`;h+=`<div class="row"><span class="label">Operador</span><span class="value">${op}</span></div>`;h+=`<div class="row"><span class="label">Checklist</span><span class="value" style="color:var(--verde);">✅ ${chk.length}/${chk.length}</span></div>`;h+=`<div class="row"><span class="label">Assinatura</span><span class="value" style="color:var(--verde);">✅ Coletada</span></div>`;h+=`<div class="row"><span class="label">Foto</span><span class="value">${photoBase64?'✅ Anexada':'Não anexada'}</span></div>`;if(obs)h+=`<div class="row"><span class="label">Obs</span><span class="value">${obs}</span></div>`;document.getElementById('confirmSummary').innerHTML=h;document.getElementById('confirmTitle').textContent='Confirmar movimentação?';const sigData=sigCanvas.toDataURL('image/png').split(',')[1];pendingPayload={tipo_registro:'movimentacao',operador:op,acao:selectedAction,cilindro_id:currentCylinder.id,tipo_gas:currentCylinder.tipo,capacidade:currentCylinder.capacidade,localizacao:loc,observacao:obs||'—',checklist:chk.join(', '),assinatura_base64:sigData,foto_base64:photoBase64||'',session_token:WC.auth.getSession()?.token||''};document.getElementById('confirmModal').classList.add('show');}
+
+// NF
+function addNfItem(){const idx=nfItemCount++;const row=document.createElement('div');row.className='nf-item-row';row.dataset.idx=idx;row.innerHTML=`<select id="nfGas${idx}"><option value="">Tipo de gás</option><option value="Óxido Nitroso — 33kg">Óxido Nitroso — 33kg</option><option value="Óxido Nitroso — 7kg">Óxido Nitroso — 7kg</option><option value="Oxigênio — 10m³">Oxigênio — 10m³</option><option value="Oxigênio — 1,5m³">Oxigênio — 1,5m³</option></select><input type="number" id="nfQtd${idx}" placeholder="Qtd" min="0"><input type="number" id="nfValor${idx}" placeholder="R$ Total" min="0" step="0.01">`;document.getElementById('nfItens').appendChild(row);}
+function confirmNf(){const num=document.getElementById('nfNumero').value.trim(),forn=document.getElementById('nfFornecedor').value.trim(),dt=document.getElementById('nfData').value,obs=document.getElementById('nfObs').value.trim();if(!num||!forn||!dt)return;const items=[];document.querySelectorAll('.nf-item-row').forEach(row=>{const i=row.dataset.idx;const gas=document.getElementById('nfGas'+i).value;const qtd=parseFloat(document.getElementById('nfQtd'+i).value)||0;const val=parseFloat(document.getElementById('nfValor'+i).value)||0;if(gas&&qtd>0)items.push({gas,qtd,capacidade:'—',valor_total:val,valor_unit:qtd>0?Math.round(val/qtd*100)/100:0});});if(items.length===0)return;let h=`<div class="row"><span class="label">NF</span><span class="value">${num}</span></div>`;h+=`<div class="row"><span class="label">Fornecedor</span><span class="value">${forn}</span></div>`;h+=`<div class="row"><span class="label">Data</span><span class="value">${dt}</span></div>`;items.forEach(it=>{h+=`<div class="row"><span class="label">${it.gas}</span><span class="value">${it.qtd} un · R$ ${it.valor_total.toFixed(2)}</span></div>`;});document.getElementById('confirmSummary').innerHTML=h;document.getElementById('confirmTitle').textContent='Confirmar Nota Fiscal?';pendingPayload={tipo_registro:'nota_fiscal',numero_nf:num,fornecedor:forn,data_nf:dt,itens:items,observacao:obs||'—',session_token:WC.auth.getSession()?.token||''};document.getElementById('confirmModal').classList.add('show');}
+['nfNumero','nfFornecedor','nfData'].forEach(id=>{document.getElementById(id).addEventListener('input',function(){document.getElementById('nfSubmitBtn').disabled=!(document.getElementById('nfNumero').value.trim()&&document.getElementById('nfFornecedor').value.trim()&&document.getElementById('nfData').value);});});
+
+// SUBMIT
+function closeConfirm(){document.getElementById('confirmModal').classList.remove('show');}
+async function submitCurrent(){document.getElementById('confirmModal').classList.remove('show');const isV=pendingPayload.tipo_registro==='valvula',isN=pendingPayload.tipo_registro==='nota_fiscal';const btnId=isV?'valveSubmitBtn':isN?'nfSubmitBtn':'moveSubmitBtn';const spinId=isV?'valveSpinner':isN?'nfSpinner':'moveSpinner';const errId=isV?'valveErrorMsg':isN?'nfErrorMsg':'moveErrorMsg';const btn=document.getElementById(btnId),spin=document.getElementById(spinId),err=document.getElementById(errId);btn.disabled=true;spin.classList.add('show');err.classList.remove('show');try{await WC.api.postAuth(WC.config.API_GASES,pendingPayload);let txt='';if(isV){const e=pendingPayload.acao==='Abertura'?'🔓':'🔒';txt=`${e} ${pendingPayload.acao} registrada\n\n${pendingPayload.valvulas.split(', ').length} válvulas`;}else if(isN){txt=`📄 NF ${pendingPayload.numero_nf} registrada\n\n${pendingPayload.fornecedor}\n${pendingPayload.itens.length} ite${pendingPayload.itens.length>1?'ns':'m'}`;}else{const e=pendingPayload.acao.includes('Retirada')?'🔴':'🟢';txt=`${e} ${pendingPayload.acao}\n\n${pendingPayload.cilindro_id} (${pendingPayload.capacidade})\n${pendingPayload.localizacao}`;const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});document.getElementById('lastRecordText').textContent=`${t} · ${pendingPayload.operador} · ${e} ${pendingPayload.acao} · ${pendingPayload.cilindro_id}`;document.getElementById('lastRecord').style.display='block';}document.getElementById('successText').textContent=txt;document.getElementById('successModal').classList.add('show');}catch(e){err.textContent='Erro de conexão.';err.classList.add('show');btn.disabled=false;}finally{spin.classList.remove('show');}}
+
+// SIGNATURE
+function initSignature(){sigCanvas=document.getElementById('sigCanvas');sigCtx=sigCanvas.getContext('2d');sigCtx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--azul').trim()||'#0F1F3A';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';const rect=()=>sigCanvas.getBoundingClientRect();const pos=(e)=>{const r=rect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(sigCanvas.width/r.width),y:(t.clientY-r.top)*(sigCanvas.height/r.height)};};sigCanvas.addEventListener('pointerdown',(e)=>{e.preventDefault();sigDrawing=true;const p=pos(e);sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);});sigCanvas.addEventListener('pointermove',(e)=>{if(!sigDrawing)return;e.preventDefault();const p=pos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sigHasData=true;document.getElementById('sigContainer').classList.add('has-sig');checkMoveReady();});sigCanvas.addEventListener('pointerup',()=>{sigDrawing=false;});sigCanvas.addEventListener('pointerleave',()=>{sigDrawing=false;});sigCanvas.style.touchAction='none';}
+function clearSig(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);sigHasData=false;document.getElementById('sigContainer').classList.remove('has-sig');checkMoveReady();}
+
+// PHOTO
+function handlePhoto(input){if(!input.files||!input.files[0])return;const file=input.files[0];const reader=new FileReader();reader.onload=function(e){const img=new Image();img.onload=function(){const max=800;let w=img.width,h=img.height;if(w>max){h=h*(max/w);w=max;}if(h>max){w=w*(max/h);h=max;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);photoBase64=c.toDataURL('image/jpeg',0.7).split(',')[1];document.getElementById('photoPreview').src=c.toDataURL('image/jpeg',0.7);document.getElementById('photoPreview').style.display='block';document.getElementById('photoActions').style.display='flex';document.getElementById('photoArea').style.display='none';};img.src=e.target.result;};reader.readAsDataURL(file);}
+function clearPhoto(){photoBase64=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoActions').style.display='none';document.getElementById('photoArea').style.display='';document.getElementById('photoInput').value='';}
+
+WC.api.init();init();
+</script>
 </body>
 </html>

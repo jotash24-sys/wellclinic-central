@@ -1,1181 +1,1481 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Well Clinic — Checklist do Dia</title>
-  <link rel="stylesheet" href="css/wellclinic.css">
-  <style>
-    /* Page-specific styles */
-    .checklist-hero-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--dourado-claro);
-      text-decoration: none;
-      transition: var(--transition);
-    }
-    .checklist-hero-link:hover {
-      color: var(--dourado);
-    }
-
-    .checklist-tabs-wrapper {
-      background: var(--branco);
-      margin-bottom: 16px;
-      border-radius: var(--radius-sm);
-    }
-
-    .wc-tabs {
-      border: none;
-      background: transparent;
-      padding: 0;
-      border-bottom: 1px solid var(--cinza-leve);
-      border-radius: 0;
-      gap: 0;
-    }
-
-    .wc-tab {
-      flex: 1;
-      border-radius: 0;
-      border-bottom: 3px solid transparent;
-      padding: 12px 16px;
-      font-size: 13px;
-      margin: 0;
-      background: transparent;
-    }
-
-    .wc-tab:hover {
-      background: var(--marfim);
-    }
-
-    .wc-tab--active {
-      background: transparent;
-      color: var(--verde);
-      border-bottom-color: var(--verde);
-    }
-
-    /* Contingência display */
-    .checklist-contingencia {
-      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-medio) 100%);
-      color: var(--marfim);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      margin-bottom: 16px;
-      font-size: 13px;
-    }
-
-    .checklist-contingencia__day {
-      font-family: var(--font-titulo);
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .checklist-contingencia__text {
-      line-height: 1.5;
-    }
-
-    .checklist-contingencia__text strong {
-      color: var(--dourado-claro);
-    }
-
-    /* User badge in checklist */
-    .checklist-user-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--branco);
-      border-radius: var(--radius);
-      border: 1px solid var(--cinza-leve);
-      box-shadow: var(--sombra-sm);
-      margin-bottom: 16px;
-    }
-
-    .checklist-user-badge__avatar {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--dourado-bg);
-      border-radius: 50%;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .checklist-user-badge__info {
-      flex: 1;
-    }
-
-    .checklist-user-badge__name {
-      font-weight: 600;
-      font-size: 14px;
-      color: var(--azul);
-      margin-bottom: 2px;
-    }
-
-    .checklist-user-badge__role {
-      font-size: 11px;
-      color: var(--cinza-texto);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    /* Tipo selector */
-    .checklist-tipo-selector {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .checklist-tipo-btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: var(--radius-sm);
-      border: 1.5px solid var(--cinza-leve);
-      background: var(--branco);
-      cursor: pointer;
-      text-align: center;
-      transition: var(--transition);
-      font-family: var(--font-corpo);
-    }
-
-    .checklist-tipo-btn:hover {
-      border-color: var(--dourado-claro);
-    }
-
-    .checklist-tipo-btn.active {
-      border-color: var(--verde);
-      background: var(--verde-bg);
-      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.1);
-    }
-
-    .checklist-tipo-btn__icon {
-      font-size: 24px;
-      margin-bottom: 6px;
-    }
-
-    .checklist-tipo-btn__label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--azul);
-    }
-
-    /* Checklist items grouping */
-    .checklist-area-group {
-      margin-bottom: 20px;
-      animation: wc-fadeUp 0.4s ease both;
-    }
-
-    .checklist-area-group:nth-child(1) { animation-delay: 0.05s; }
-    .checklist-area-group:nth-child(2) { animation-delay: 0.10s; }
-    .checklist-area-group:nth-child(3) { animation-delay: 0.15s; }
-    .checklist-area-group:nth-child(4) { animation-delay: 0.20s; }
-    .checklist-area-group:nth-child(5) { animation-delay: 0.25s; }
-
-    .checklist-area-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 0 8px 0;
-      margin-bottom: 8px;
-    }
-
-    .checklist-area-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--dourado);
-      flex-shrink: 0;
-    }
-
-    .checklist-area-name {
-      font-family: var(--font-titulo);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--azul);
-      flex: 1;
-    }
-
-    .checklist-area-setor {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--cinza-texto);
-      background: var(--cinza-leve);
-      padding: 2px 8px;
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
-
-    /* Override for checklist item styling */
-    .checklist-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      background: var(--branco);
-      border: 1px solid var(--cinza-leve);
-      border-left: 3px solid transparent;
-      border-radius: var(--radius-sm);
-      margin-bottom: 8px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .checklist-item:hover {
-      border-color: var(--dourado-claro);
-      box-shadow: var(--sombra-md);
-    }
-
-    .checklist-item.checked {
-      background: var(--verde-bg);
-      border-left-color: var(--verde);
-      border-color: var(--verde);
-    }
-
-    .checklist-item.alta.checked {
-      border-left-color: var(--verde);
-    }
-
-    .checklist-item__checkbox {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--cinza-leve);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: var(--transition);
-      margin-top: 2px;
-    }
-
-    .checklist-item.checked .checklist-item__checkbox {
-      background: var(--verde);
-      border-color: var(--verde);
-      color: var(--branco);
-      font-size: 14px;
-      font-weight: bold;
-    }
-
-    .checklist-item__content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .checklist-item__text {
-      font-size: 13px;
-      color: var(--grafite);
-      line-height: 1.4;
-    }
-
-    .checklist-item.checked .checklist-item__text {
-      text-decoration: line-through;
-      color: var(--cinza-texto);
-    }
-
-    .checklist-item__priority {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--vermelho);
-      margin-top: 4px;
-    }
-
-    /* Progress section */
-    .checklist-progress-card {
-      background: var(--branco);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      box-shadow: var(--sombra-sm);
-      margin-bottom: 16px;
-    }
-
-    .checklist-progress-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .checklist-progress-text {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--azul);
-    }
-
-    .checklist-progress-count {
-      font-size: 13px;
-      color: var(--dourado);
-      font-weight: 600;
-    }
-
-    .checklist-progress-bar {
-      width: 100%;
-      height: 8px;
-      background: var(--cinza-leve);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .checklist-progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--verde), var(--verde-claro));
-      border-radius: 4px;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      width: 0%;
-    }
-
-    /* Observações section */
-    .checklist-obs-card {
-      background: var(--branco);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--sombra-sm);
-      margin-bottom: 16px;
-    }
-
-    .checklist-obs-card label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--dourado);
-      margin-bottom: 10px;
-    }
-
-    .checklist-obs-card textarea {
-      width: 100%;
-      padding: 12px 14px;
-      font-family: var(--font-corpo);
-      font-size: 13px;
-      border: 1.5px solid var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      background: var(--branco);
-      color: var(--grafite);
-      resize: vertical;
-      min-height: 80px;
-      transition: var(--transition);
-      outline: none;
-    }
-
-    .checklist-obs-card textarea:focus {
-      border-color: var(--verde);
-      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.12);
-    }
-
-    /* Signature section */
-    .checklist-sig-card {
-      background: var(--branco);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--sombra-sm);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .checklist-sig-card label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--dourado);
-      margin-bottom: 12px;
-    }
-
-    #checklistSignatureCanvas {
-      width: 100%;
-      height: 120px;
-      border: 2px dashed var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      background: var(--marfim);
-      cursor: crosshair;
-      touch-action: none;
-    }
-
-    #checklistSignatureCanvas.signed {
-      border-color: var(--verde);
-      border-style: solid;
-    }
-
-    .checklist-clear-sig {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--cinza-texto);
-      background: none;
-      border: none;
-      cursor: pointer;
-      text-decoration: underline;
-      font-family: var(--font-corpo);
-      transition: var(--transition);
-    }
-
-    .checklist-clear-sig:hover {
-      color: var(--vermelho);
-    }
-
-    /* Submit button */
-    .checklist-submit-btn {
-      width: 100%;
-      padding: 14px 28px;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 100px;
-    }
-
-    /* Reservas tab styles */
-    .checklist-reserva-form-card {
-      background: var(--branco);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--sombra-sm);
-      margin-bottom: 20px;
-    }
-
-    .checklist-form-section-title {
-      font-family: var(--font-titulo);
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--azul);
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--dourado);
-    }
-
-    .checklist-form-group {
-      margin-bottom: 16px;
-    }
-
-    .checklist-form-group label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--dourado);
-      margin-bottom: 8px;
-    }
-
-    .checklist-form-group input,
-    .checklist-form-group select,
-    .checklist-form-group textarea {
-      width: 100%;
-      padding: 12px 14px;
-      font-family: var(--font-corpo);
-      font-size: 13px;
-      border: 1.5px solid var(--cinza-leve);
-      border-radius: var(--radius-sm);
-      background: var(--branco);
-      color: var(--grafite);
-      transition: var(--transition);
-      outline: none;
-    }
-
-    .checklist-form-group input:focus,
-    .checklist-form-group select:focus,
-    .checklist-form-group textarea:focus {
-      border-color: var(--verde);
-      box-shadow: 0 0 0 3px rgba(74, 158, 142, 0.12);
-    }
-
-    .checklist-form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .checklist-form-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .checklist-form-row > .checklist-form-group {
-      flex: 1;
-    }
-
-    /* Reserva list */
-    .checklist-reserva-card {
-      background: var(--branco);
-      border-radius: var(--radius);
-      padding: 16px 20px;
-      box-shadow: var(--sombra-sm);
-      border: 1px solid var(--cinza-leve);
-      margin-bottom: 12px;
-    }
-
-    .checklist-reserva-card__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .checklist-reserva-card__title {
-      font-family: var(--font-titulo);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--azul);
-    }
-
-    .checklist-reserva-status {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .checklist-reserva-status.pendente {
-      background: rgba(160, 137, 108, 0.15);
-      color: var(--dourado);
-    }
-
-    .checklist-reserva-status.aprovada {
-      background: var(--verde-bg);
-      color: var(--verde);
-    }
-
-    .checklist-reserva-status.rejeitada {
-      background: var(--vermelho-bg);
-      color: var(--vermelho);
-    }
-
-    .checklist-reserva-card__detail {
-      font-size: 12px;
-      color: var(--cinza-texto);
-      line-height: 1.5;
-    }
-
-    .checklist-empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: var(--cinza-texto);
-    }
-
-    .checklist-empty-state__icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-      opacity: 0.5;
-    }
-
-    .checklist-empty-state__text {
-      font-size: 13px;
-    }
-
-    /* Responsive */
-    @media (min-width: 768px) {
-      .wc-container {
-        padding: 24px 20px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Well Clinic — Checklist</title>
+
+<!-- ═══ SHARED STYLESHEETS & SCRIPTS ═══ -->
+<link rel="stylesheet" href="css/wellclinic.css">
+
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     CHECKLIST PAGE-SPECIFIC STYLES
+     (Keep unique styles, remove duplicates with wellclinic.css)
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ---- HEADER CUSTOMIZATION ---- */
+  .header {
+    background: var(--azul);
+    color: var(--marfim);
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 20px rgba(15,31,58,0.3);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-family: 'Lora', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .header-badge {
+    background: var(--verde);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ---- TABS ---- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(250,247,242,0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    background: none;
+  }
+  .tab.active {
+    background: var(--verde);
+    color: white;
+    font-weight: 600;
+  }
+  .tab:not(.active):hover {
+    color: rgba(250,247,242,0.8);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* ---- CONTAINER ---- */
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 100px;
+  }
+
+  /* ---- VIEWS ---- */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---- SELEÇÃO DE PESSOA / USER BADGE ---- */
+  .select-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    margin-bottom: 16px;
+  }
+  .select-card label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--dourado);
+    margin-bottom: 10px;
+  }
+  .select-card select {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    border: 2px solid var(--cinza-leve);
+    border-radius: 10px;
+    background: var(--marfim);
+    color: var(--azul);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A0896C' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .select-card select:focus {
+    outline: none;
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(74,158,142,0.15);
+  }
+
+  /* ---- INFO CONTINGÊNCIA ---- */
+  .contingencia-info {
+    background: linear-gradient(135deg, var(--azul), #1a2d4d);
+    color: var(--marfim);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+  }
+  .contingencia-info strong {
+    color: var(--dourado);
+  }
+  .contingencia-info .dia {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* ---- TIPO SELECTOR ---- */
+  .tipo-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .tipo-btn {
+    flex: 1;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 2px solid var(--cinza-leve);
+    background: var(--branco);
+    cursor: pointer;
+    text-align: center;
+    transition: var(--transition);
+    font-family: 'Poppins', sans-serif;
+  }
+  .tipo-btn .icon { font-size: 1.5rem; margin-bottom: 4px; }
+  .tipo-btn .label { font-size: 0.8rem; font-weight: 600; color: var(--azul); }
+  .tipo-btn.active {
+    border-color: var(--verde);
+    background: rgba(74,158,142,0.06);
+    box-shadow: 0 0 0 3px rgba(74,158,142,0.1);
+  }
+  .tipo-btn:hover:not(.active) {
+    border-color: var(--dourado);
+  }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-container {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    margin-bottom: 16px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--azul);
+  }
+  .progress-count {
+    font-size: 0.8rem;
+    color: var(--dourado);
+    font-weight: 600;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--cinza-leve);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--verde), #5CB8A5);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  /* ---- AREA GROUP ---- */
+  .area-group {
+    margin-bottom: 16px;
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .area-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .area-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dourado);
+    flex-shrink: 0;
+  }
+  .area-name {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--azul);
+  }
+  .area-setor {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--cinza-texto);
+    background: var(--cinza-leve);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ---- CHECKLIST ITEM ---- */
+  .check-item {
+    background: var(--branco);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: var(--transition);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .check-item:hover {
+    box-shadow: 0 4px 24px rgba(15,31,58,0.12);
+    transform: translateY(-1px);
+  }
+  .check-item.checked {
+    background: rgba(74,158,142,0.04);
+    border-left-color: var(--verde);
+    opacity: 0.8;
+  }
+  .check-item.alta { border-left-color: var(--vermelho); }
+  .check-item.alta.checked { border-left-color: var(--verde); }
+
+  .check-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 2px solid var(--cinza-leve);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    margin-top: 1px;
+  }
+  .check-item.checked .check-box {
+    background: var(--verde);
+    border-color: var(--verde);
+  }
+  .check-box svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    transition: var(--transition);
+    stroke: white;
+    stroke-width: 3;
+    fill: none;
+  }
+  .check-item.checked .check-box svg { opacity: 1; }
+
+  .check-content { flex: 1; }
+  .check-desc {
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: var(--azul);
+  }
+  .check-item.checked .check-desc {
+    text-decoration: line-through;
+    color: var(--cinza-texto);
+  }
+  .check-priority {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--vermelho);
+    margin-top: 4px;
+  }
+
+  /* ---- OBSERVAÇÕES ---- */
+  .obs-section {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    margin-bottom: 16px;
+  }
+  .obs-section label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--dourado);
+    margin-bottom: 10px;
+  }
+  .obs-section textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.88rem;
+    border: 2px solid var(--cinza-leve);
+    border-radius: 10px;
+    background: var(--marfim);
+    color: var(--azul);
+    resize: vertical;
+    min-height: 80px;
+    transition: var(--transition);
+  }
+  .obs-section textarea:focus {
+    outline: none;
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(74,158,142,0.15);
+  }
+
+  /* ---- ASSINATURA ---- */
+  .signature-section {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .signature-section label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--dourado);
+    margin-bottom: 12px;
+  }
+  .signature-canvas {
+    width: 100%;
+    height: 100px;
+    border: 2px dashed var(--cinza-leve);
+    border-radius: 10px;
+    background: var(--marfim);
+    cursor: crosshair;
+    touch-action: none;
+  }
+  .signature-canvas.signed {
+    border-color: var(--verde);
+    border-style: solid;
+  }
+  .clear-sig {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--cinza-texto);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* ---- SUBMIT BUTTON ---- */
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, var(--verde), #3D8A7C);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(74,158,142,0.3);
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(74,158,142,0.4);
+  }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--cinza-texto);
+  }
+  .empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: 0.5;
+  }
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  /* ---- LOADING STATE ---- */
+  .loading {
+    text-align: center;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--cinza-texto);
+    font-size: 0.9rem;
+  }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--cinza-leve);
+    border-top-color: var(--verde);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ---- RESERVA ---- */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--azul);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    border: 2px solid var(--cinza-leve);
+    border-radius: 10px;
+    background: var(--marfim);
+    color: var(--azul);
+    transition: var(--transition);
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(74,158,142,0.15);
+  }
+
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--azul);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--cinza-leve);
+  }
+
+  .reserva-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    border-left: 4px solid var(--dourado);
+  }
+  .reserva-card h4 {
+    font-family: 'Lora', serif;
+    font-size: 0.95rem;
+    color: var(--azul);
+    margin: 0 0 8px 0;
+  }
+  .reserva-detail {
+    font-size: 0.8rem;
+    color: var(--cinza-texto);
+    line-height: 1.5;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .status-badge.pendente {
+    background: rgba(160,137,108,0.12);
+    color: var(--dourado);
+  }
+  .status-badge.aprovada {
+    background: rgba(74,158,142,0.12);
+    color: var(--verde);
+  }
+  .status-badge.recusada {
+    background: rgba(212,100,74,0.12);
+    color: var(--vermelho);
+  }
+
+  /* ---- REGRAS ---- */
+  .regras-card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 12px rgba(15,31,58,0.08);
+    border-left: 4px solid var(--dourado);
+  }
+  .regra-categoria {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--dourado);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .regra-texto {
+    font-size: 0.9rem;
+    color: var(--azul);
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .regra-obs {
+    font-size: 0.75rem;
+    color: var(--cinza-texto);
+    font-style: italic;
+  }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    padding: 16px 20px;
+    background: var(--verde);
+    color: white;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgba(15,31,58,0.12);
+    display: none;
+    z-index: 2000;
+    animation: slideUp 0.3s ease;
+  }
+  .toast.show { display: block; }
+  .toast.error { background: var(--vermelho); }
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
 </head>
 <body>
 
-  <!-- Auth overlays (loading, login, register) -->
-  <div id="wcLoading" class="wc-loading">
-    <div class="wc-loading__spinner"></div>
-    <div class="wc-loading__text">Carregando...</div>
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="header-top">
+    <h1>✅ Checklist</h1>
+    <span class="header-badge" id="headerBadge">Checklist</span>
   </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchView('checklist')">✅ Checklist</button>
+    <button class="tab" onclick="switchView('reserva')">🗓 Reserva</button>
+    <button class="tab" onclick="switchView('regras')">📋 Regras</button>
+  </div>
+</div>
 
-  <div id="wcLogin" class="wc-login">
-    <div class="wc-login__box">
-      <div style="font-size:32px;margin-bottom:12px;">🏥</div>
-      <div class="wc-login__title">Well Clinic</div>
-      <div class="wc-login__subtitle">Central Operacional</div>
-      <div class="wc-form-group">
-        <input type="email" id="loginEmail" class="wc-input" placeholder="Seu e-mail" autocomplete="email">
-      </div>
-      <div class="wc-form-group">
-        <input type="password" id="loginPin" class="wc-input" placeholder="Sua senha (PIN)" autocomplete="current-password" inputmode="numeric">
-      </div>
-      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnLogin">Entrar</button>
-      <div id="loginError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
-      <div class="wc-text-sm wc-text-muted wc-mt-16">Primeiro acesso? Verifique seu e-mail para o convite.</div>
+<!-- ===== MAIN CONTAINER ===== -->
+<div class="container">
+
+  <!-- ===== VIEW: CHECKLIST ===== -->
+  <div class="view active" id="view-checklist">
+
+    <!-- User Badge (auto-detected) -->
+    <div id="userBadgeContainer"></div>
+
+    <!-- Seleção de Pessoa (fallback) -->
+    <div class="select-card" id="selectCardFallback" style="display:none;">
+      <label>Quem é você?</label>
+      <select id="selectPessoa" onchange="onPessoaChange()">
+        <option value="">Selecione seu nome...</option>
+      </select>
     </div>
-  </div>
 
-  <div id="wcRegister" class="wc-register">
-    <div class="wc-login__box">
-      <div style="font-size:32px;margin-bottom:12px;">👋</div>
-      <div class="wc-login__title">Bem-vindo!</div>
-      <div class="wc-login__subtitle" id="registerSubtitle">Configure seu acesso</div>
-      <div class="wc-form-group">
-        <label class="wc-label">Como quer ser chamado?</label>
-        <input type="text" id="registerApelido" class="wc-input" placeholder="Ex: Jonatã, Dra. Jaque, Gabi...">
-      </div>
-      <div class="wc-form-group">
-        <label class="wc-label">Crie uma senha (4+ dígitos)</label>
-        <input type="password" id="registerPin" class="wc-input" placeholder="Sua senha" inputmode="numeric">
-      </div>
-      <div class="wc-form-group">
-        <label class="wc-label">Confirme a senha</label>
-        <input type="password" id="registerPinConfirm" class="wc-input" placeholder="Repita a senha" inputmode="numeric">
-      </div>
-      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg" id="btnRegister">Criar Acesso</button>
-      <div id="registerError" class="wc-text-sm wc-mt-8" style="color:var(--vermelho);display:none;"></div>
+    <!-- Info contingência -->
+    <div class="contingencia-info" id="contingenciaInfo" style="display:none;">
+      <div class="dia" id="contDia"></div>
+      <div id="contTexto"></div>
     </div>
-  </div>
 
-  <!-- Hero/Header -->
-  <div class="wc-hero">
-    <div class="wc-hero-top">
-      <a href="index.html" class="wc-hero-brand">
-        <span class="brand-icon" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px;">🏥</span>
-        Well Clinic Central
-      </a>
-      <a href="index.html" class="wc-hero-link">Portal ↩</a>
-    </div>
-    <div class="wc-hero-title">Checklist do Dia</div>
-  </div>
-
-  <!-- Main container -->
-  <div class="wc-container">
-
-    <!-- Tabs wrapper -->
-    <div class="checklist-tabs-wrapper">
-      <div class="wc-tabs">
-        <button class="wc-tab wc-tab--active" onclick="app.switchTab('checklist')">✅ Checklist</button>
-        <button class="wc-tab" onclick="app.switchTab('reservas')">🗓 Reservas</button>
+    <!-- Tipo: Abertura ou Fechamento -->
+    <div class="tipo-selector" id="tipoSelector" style="display:none;">
+      <div class="tipo-btn" data-tipo="Abertura" onclick="selectTipo('Abertura')">
+        <div class="icon">🌅</div>
+        <div class="label">Abertura</div>
+      </div>
+      <div class="tipo-btn" data-tipo="Fechamento" onclick="selectTipo('Fechamento')">
+        <div class="icon">🌙</div>
+        <div class="label">Fechamento</div>
       </div>
     </div>
 
-    <!-- ===== TAB: CHECKLIST ===== -->
-    <div id="tab-checklist" class="checklist-tab-content">
+    <!-- Progresso -->
+    <div class="progress-container" id="progressContainer" style="display:none;">
+      <div class="progress-header">
+        <span class="progress-text" id="progressText">Progresso</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
 
-      <!-- User badge (auto-detected from session) -->
-      <div class="checklist-user-badge" id="userBadge" style="display:none;">
-        <div class="checklist-user-badge__avatar">👤</div>
-        <div class="checklist-user-badge__info">
-          <div class="checklist-user-badge__name" id="userBadgeName">—</div>
-          <div class="checklist-user-badge__role" id="userBadgeRole">—</div>
+    <!-- Itens do Checklist -->
+    <div id="checklistContainer"></div>
+
+    <!-- Observações -->
+    <div class="obs-section" id="obsSection" style="display:none;">
+      <label>Observações (opcional)</label>
+      <textarea id="obsText" placeholder="Alguma observação ou pendência..."></textarea>
+    </div>
+
+    <!-- Assinatura Digital -->
+    <div class="signature-section" id="sigSection" style="display:none;">
+      <label>Assinatura Digital</label>
+      <canvas class="signature-canvas" id="sigCanvas"></canvas>
+      <br>
+      <button class="clear-sig" onclick="clearSignature()">Limpar assinatura</button>
+    </div>
+
+    <!-- Botão Enviar -->
+    <button class="submit-btn" id="submitBtn" style="display:none;" onclick="submitChecklist()" disabled>
+      Registrar Checklist
+    </button>
+  </div>
+
+  <!-- ===== VIEW: RESERVA ===== -->
+  <div class="view" id="view-reserva">
+
+    <div class="section-title">Nova Reserva de Sala</div>
+
+    <div class="select-card" style="margin-bottom: 20px;">
+      <div class="form-group">
+        <label>Solicitante</label>
+        <select id="reservaSolicitante">
+          <option value="">Selecione seu nome...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Sala</label>
+        <select id="reservaSala">
+          <option value="">Selecione a sala...</option>
+          <option value="Sala 209">Sala 209</option>
+          <option value="Sala 8">Sala 8 / Consultório 8</option>
+          <option value="Sala Dentistas">Sala dos Dentistas</option>
+          <option value="Auditório">Auditório</option>
+          <option value="Consultório 1">Consultório 1</option>
+          <option value="Consultório 2">Consultório 2</option>
+          <option value="Consultório 3">Consultório 3</option>
+          <option value="Laboratório">Laboratório</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="reservaData">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <div class="form-group" style="flex:1;">
+          <label>Hora Início</label>
+          <input type="time" id="reservaInicio">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>Hora Fim</label>
+          <input type="time" id="reservaFim">
         </div>
       </div>
-
-      <!-- Contingência display -->
-      <div class="checklist-contingencia" id="contingenciaDisplay" style="display:none;">
-        <div class="checklist-contingencia__day" id="contingenciaDia"></div>
-        <div class="checklist-contingencia__text">
-          Backup: <strong id="contingenciaName"></strong>
-        </div>
+      <div class="form-group">
+        <label>Motivo</label>
+        <textarea id="reservaMotivo" rows="3" placeholder="Descreva o motivo da reserva..."></textarea>
       </div>
-
-      <!-- Tipo selector (Abertura / Fechamento) -->
-      <div class="checklist-tipo-selector" id="tipoSelector" style="display:none;">
-        <button class="checklist-tipo-btn" data-tipo="abertura" onclick="app.selectTipo('abertura')">
-          <div class="checklist-tipo-btn__icon">🌅</div>
-          <div class="checklist-tipo-btn__label">Abertura</div>
-        </button>
-        <button class="checklist-tipo-btn" data-tipo="fechamento" onclick="app.selectTipo('fechamento')">
-          <div class="checklist-tipo-btn__icon">🌙</div>
-          <div class="checklist-tipo-btn__label">Fechamento</div>
-        </button>
-      </div>
-
-      <!-- Progress bar -->
-      <div class="checklist-progress-card" id="progressCard" style="display:none;">
-        <div class="checklist-progress-header">
-          <span class="checklist-progress-text" id="progressText">Progresso</span>
-          <span class="checklist-progress-count" id="progressCount">0 / 0</span>
-        </div>
-        <div class="checklist-progress-bar">
-          <div class="checklist-progress-fill" id="progressFill"></div>
-        </div>
-      </div>
-
-      <!-- Checklist items container -->
-      <div id="checklistItemsContainer"></div>
-
-      <!-- Observações -->
-      <div class="checklist-obs-card" id="obsCard" style="display:none;">
-        <label>Observações (opcional)</label>
-        <textarea id="obsText" placeholder="Alguma observação ou pendência..."></textarea>
-      </div>
-
-      <!-- Signature -->
-      <div class="checklist-sig-card" id="sigCard" style="display:none;">
-        <label>Assinatura Digital</label>
-        <canvas id="checklistSignatureCanvas" class="wc-signature"></canvas>
-        <button class="checklist-clear-sig" onclick="app.clearSignature()">Limpar assinatura</button>
-      </div>
-
-      <!-- Submit button -->
-      <button class="wc-btn wc-btn--primary wc-btn--full wc-btn--lg checklist-submit-btn" id="submitBtn" style="display:none;" onclick="app.submitChecklist()" disabled>
-        Registrar Checklist
+      <button class="submit-btn" onclick="submitReserva()">
+        Solicitar Reserva
       </button>
     </div>
 
-    <!-- ===== TAB: RESERVAS ===== -->
-    <div id="tab-reservas" class="checklist-tab-content" style="display:none;">
-
-      <!-- New reservation form -->
-      <div class="checklist-reserva-form-card">
-        <div class="checklist-form-section-title">Nova Reserva de Cilindro</div>
-
-        <div class="checklist-form-group">
-          <label>Cilindro</label>
-          <select id="reservaCilindro">
-            <option value="">Selecione um cilindro...</option>
-          </select>
-        </div>
-
-        <div class="checklist-form-group">
-          <label>Motivo da Reserva</label>
-          <textarea id="reservaMotivo" placeholder="Descreva brevemente o motivo..."></textarea>
-        </div>
-
-        <button class="wc-btn wc-btn--primary wc-btn--full" onclick="app.submitReserva()">
-          Solicitar Reserva
-        </button>
-      </div>
-
-      <!-- Reservas list -->
-      <div class="checklist-form-section-title">Reservas Pendentes</div>
-      <div id="reservasListContainer">
-        <div class="checklist-empty-state">
-          <div class="checklist-empty-state__icon">⏳</div>
-          <div class="checklist-empty-state__text">Carregando reservas...</div>
-        </div>
-      </div>
-
+    <div class="section-title">Minhas Reservas</div>
+    <div id="reservasList">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
     </div>
-
   </div>
 
-  <!-- Toast container -->
-  <div class="wc-toast-container" id="wcToastContainer"></div>
-
-  <!-- Scripts -->
-  <script src="js/config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-
-  <script>
-    // ════════════════════════════════════════════════════════════════
-    // CHECKLIST APPLICATION
-    // ════════════════════════════════════════════════════════════════
-
-    const app = {
-      user: null,
-      currentTab: 'checklist',
-      checklistItems: [],
-      checkedItems: new Set(),
-      currentTipo: null,
-      signatureHelper: null,
-      signatureHasSigned: false,
-
-      // ─── Initialize ───
-      async init() {
-        const authResult = await WC.auth.init();
-
-        if (!authResult.authenticated) {
-          // Show login (already handled by auth.init())
-          WC.ui.bindAuthEvents();
-          return;
-        }
-
-        // Authenticated: load page content
-        WC.ui.hideLoading();
-        this.user = WC.auth.getUser();
-
-        if (!this.user) {
-          window.location.href = WC.config.BASE_URL;
-          return;
-        }
-
-        // Show user badge
-        this.updateUserBadge();
-
-        // Initialize API
-        WC.api.init();
-
-        // Load contingência info
-        this.loadContingencia();
-
-        // Load checklist items
-        await this.loadChecklistItems();
-
-        // Load reservas list
-        await this.loadReservas();
-
-        // Setup signature canvas
-        this.setupSignatureCanvas();
-
-        // Show tipo selector
-        document.getElementById('tipoSelector').style.display = 'flex';
-        document.getElementById('progressCard').style.display = 'block';
-        document.getElementById('obsCard').style.display = 'block';
-        document.getElementById('sigCard').style.display = 'block';
-        document.getElementById('submitBtn').style.display = 'block';
-      },
-
-      updateUserBadge() {
-        const badge = document.getElementById('userBadge');
-        const name = document.getElementById('userBadgeName');
-        const role = document.getElementById('userBadgeRole');
-
-        name.textContent = WC.auth.getDisplayName();
-        role.textContent = this.user.cargo || 'Equipe';
-        badge.style.display = 'flex';
-      },
-
-      loadContingencia() {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const backup = WC.config.CONTINGENCIA[dayOfWeek] || 'Jonatã';
-
-        const daysName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const display = document.getElementById('contingenciaDisplay');
-        document.getElementById('contingenciaDia').textContent = daysName[dayOfWeek];
-        document.getElementById('contingenciaName').textContent = backup;
-        display.style.display = 'block';
-      },
-
-      async loadChecklistItems() {
-        try {
-          const resp = await WC.api.get(WC.config.API_CHECKLIST, { action: 'checklist_items' });
-
-          if (resp && Array.isArray(resp)) {
-            this.checklistItems = resp;
-          }
-        } catch (e) {
-          WC.ui.toast('Erro ao carregar itens do checklist', 'error');
-          console.error(e);
-        }
-
-        this.renderChecklistItems();
-      },
-
-      renderChecklistItems() {
-        const container = document.getElementById('checklistItemsContainer');
-        if (!this.checklistItems || this.checklistItems.length === 0) {
-          container.innerHTML = `
-            <div class="checklist-empty-state">
-              <div class="checklist-empty-state__icon">📋</div>
-              <div class="checklist-empty-state__text">Nenhum item carregado</div>
-            </div>
-          `;
-          return;
-        }
-
-        // Group by area/setor
-        const grouped = {};
-        this.checklistItems.forEach(item => {
-          const area = item.area || 'Geral';
-          if (!grouped[area]) grouped[area] = [];
-          grouped[area].push(item);
-        });
-
-        let html = '';
-        Object.keys(grouped).forEach(area => {
-          html += `
-            <div class="checklist-area-group">
-              <div class="checklist-area-header">
-                <div class="checklist-area-dot"></div>
-                <div class="checklist-area-name">${area}</div>
-                ${grouped[area][0].setor ? `<div class="checklist-area-setor">${grouped[area][0].setor}</div>` : ''}
-              </div>
-          `;
-
-          grouped[area].forEach(item => {
-            const checked = this.checkedItems.has(item.id) ? 'checked' : '';
-            const priorityClass = item.prioridade === 'Alta' ? 'alta' : '';
-            const checkmark = this.checkedItems.has(item.id) ? '✓' : '';
-
-            html += `
-              <div class="checklist-item ${checked} ${priorityClass}" data-id="${item.id}" onclick="app.toggleItem('${item.id}')">
-                <div class="checklist-item__checkbox">${checkmark}</div>
-                <div class="checklist-item__content">
-                  <div class="checklist-item__text">${item.descricao || item.description}</div>
-                  ${item.prioridade === 'Alta' ? '<div class="checklist-item__priority">Alta Prioridade</div>' : ''}
-                </div>
-              </div>
-            `;
-          });
-
-          html += '</div>';
-        });
-
-        container.innerHTML = html;
-      },
-
-      toggleItem(id) {
-        if (this.checkedItems.has(id)) {
-          this.checkedItems.delete(id);
-        } else {
-          this.checkedItems.add(id);
-        }
-
-        this.renderChecklistItems();
-        this.updateProgress();
-      },
-
-      updateProgress() {
-        const total = this.checklistItems.length;
-        const done = this.checkedItems.size;
-        const pct = total > 0 ? (done / total) * 100 : 0;
-
-        document.getElementById('progressFill').style.width = `${pct}%`;
-        document.getElementById('progressCount').textContent = `${done} / ${total}`;
-
-        const text = document.getElementById('progressText');
-        if (pct === 100) {
-          text.textContent = '✅ Tudo verificado!';
-          text.style.color = 'var(--verde)';
-        } else if (pct >= 50) {
-          text.textContent = 'Bom progresso...';
-          text.style.color = 'var(--dourado)';
-        } else {
-          text.textContent = 'Progresso';
-          text.style.color = 'var(--azul)';
-        }
-
-        // Enable submit if has items checked and signed
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = !(done > 0 && this.signatureHasSigned);
-      },
-
-      selectTipo(tipo) {
-        this.currentTipo = tipo;
-
-        // Update UI
-        document.querySelectorAll('.checklist-tipo-btn').forEach(btn => {
-          if (btn.dataset.tipo === tipo) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
-          }
-        });
-      },
-
-      async submitChecklist() {
-        if (!this.currentTipo || this.checkedItems.size === 0) {
-          WC.ui.toast('Selecione um tipo e marque pelo menos um item', 'error');
-          return;
-        }
-
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Enviando...';
-
-        const pendences = this.checklistItems
-          .filter(item => !this.checkedItems.has(item.id))
-          .map(item => item.descricao || item.description);
-
-        const payload = {
-          tipo_registro: 'checklist',
-          tipo: this.currentTipo,
-          responsavel: this.user.nome,
-          cargo: this.user.cargo,
-          itensConcluidos: this.checkedItems.size,
-          totalItens: this.checklistItems.length,
-          pendencias: pendences,
-          observacoes: document.getElementById('obsText').value,
-          assinatura: WC.auth.getDisplayName(),
-          session_token: (WC.auth.getSession() || {}).token
-        };
-
-        try {
-          const resp = await WC.api.post(WC.config.API_CHECKLIST, payload);
-
-          if (resp.status === 'ok' || resp.success) {
-            WC.ui.toast('✅ Checklist registrado com sucesso!', 'success');
-            setTimeout(() => this.resetChecklist(), 1500);
-          } else {
-            WC.ui.toast('Erro: ' + (resp.msg || resp.error || 'Tente novamente'), 'error');
-          }
-        } catch (e) {
-          WC.ui.toast('Erro de conexão. Tentando offline...', 'error');
-          WC.api.queueOffline(WC.config.API_CHECKLIST, payload);
-        }
-
-        btn.disabled = false;
-        btn.textContent = 'Registrar Checklist';
-      },
-
-      resetChecklist() {
-        this.checkedItems = new Set();
-        this.currentTipo = null;
-        document.getElementById('obsText').value = '';
-        this.clearSignature();
-        this.renderChecklistItems();
-        this.updateProgress();
-
-        // Reset tipo buttons
-        document.querySelectorAll('.checklist-tipo-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-      },
-
-      setupSignatureCanvas() {
-        this.signatureHelper = WC.ui.setupSignature('checklistSignatureCanvas');
-
-        if (this.signatureHelper) {
-          const canvas = document.getElementById('checklistSignatureCanvas');
-
-          // Override hasSigned tracking
-          const origHasSigned = this.signatureHelper.hasSigned.bind(this.signatureHelper);
-          Object.defineProperty(this, 'signatureHasSigned', {
-            get: () => origHasSigned(),
-            set: (val) => {
-              // Sync with signature canvas state
-            }
-          });
-
-          // Listen for signature changes
-          canvas.addEventListener('mouseup', () => {
-            this.signatureHasSigned = this.signatureHelper.hasSigned();
-            this.updateProgress();
-          });
-
-          canvas.addEventListener('touchend', () => {
-            this.signatureHasSigned = this.signatureHelper.hasSigned();
-            this.updateProgress();
-          });
-        }
-      },
-
-      clearSignature() {
-        if (this.signatureHelper) {
-          this.signatureHelper.clear();
-          this.signatureHasSigned = false;
-          this.updateProgress();
-        }
-      },
-
-      async loadReservas() {
-        const container = document.getElementById('reservasListContainer');
-
-        try {
-          const resp = await WC.api.get(WC.config.API_GASES, {
-            action: 'listar_reservas',
-            key: 'wellclinic2026admin'
-          });
-
-          if (!resp || resp.length === 0) {
-            container.innerHTML = `
-              <div class="checklist-empty-state">
-                <div class="checklist-empty-state__icon">📦</div>
-                <div class="checklist-empty-state__text">Nenhuma reserva registrada</div>
-              </div>
-            `;
-            return;
-          }
-
-          let html = '';
-          resp.forEach(r => {
-            const status = (r.status || 'pendente').toLowerCase();
-            html += `
-              <div class="checklist-reserva-card">
-                <div class="checklist-reserva-card__header">
-                  <div class="checklist-reserva-card__title">${r.cilindro || r.tipo_gas || 'Cilindro'}</div>
-                  <span class="checklist-reserva-status ${status}">${r.status || 'Pendente'}</span>
-                </div>
-                <div class="checklist-reserva-card__detail">
-                  <strong>${r.solicitante || '—'}</strong><br>
-                  ${r.motivo ? r.motivo + '<br>' : ''}
-                  ${r.data_criacao ? '<em>' + WC.ui.formatDateShort(r.data_criacao) + '</em>' : ''}
-                </div>
-              </div>
-            `;
-          });
-
-          container.innerHTML = html;
-        } catch (e) {
-          container.innerHTML = `
-            <div class="checklist-empty-state">
-              <div class="checklist-empty-state__icon">❌</div>
-              <div class="checklist-empty-state__text">Erro ao carregar reservas</div>
-            </div>
-          `;
-          console.error(e);
-        }
-      },
-
-      async submitReserva() {
-        const cilindro = document.getElementById('reservaCilindro').value;
-        const motivo = document.getElementById('reservaMotivo').value;
-
-        if (!cilindro || !motivo) {
-          WC.ui.toast('Preencha todos os campos', 'error');
-          return;
-        }
-
-        const btn = event.target;
-        btn.disabled = true;
-        btn.textContent = 'Enviando...';
-
-        const payload = {
-          tipo_registro: 'reserva',
-          cilindro: cilindro,
-          solicitante: this.user.nome,
-          motivo: motivo,
-          session_token: (WC.auth.getSession() || {}).token
-        };
-
-        try {
-          const resp = await WC.api.post(WC.config.API_GASES, payload);
-
-          if (resp.status === 'ok' || resp.success) {
-            WC.ui.toast('✅ Reserva solicitada! Aguarde aprovação.', 'success');
-            document.getElementById('reservaCilindro').value = '';
-            document.getElementById('reservaMotivo').value = '';
-            await this.loadReservas();
-          } else {
-            WC.ui.toast('Erro: ' + (resp.msg || resp.error || 'Tente novamente'), 'error');
-          }
-        } catch (e) {
-          WC.ui.toast('Erro de conexão', 'error');
-          console.error(e);
-        }
-
-        btn.disabled = false;
-        btn.textContent = 'Solicitar Reserva';
-      },
-
-      switchTab(tab) {
-        this.currentTab = tab;
-
-        // Update tab buttons
-        document.querySelectorAll('.wc-tab').forEach(btn => {
-          btn.classList.remove('wc-tab--active');
-        });
-        event.target.classList.add('wc-tab--active');
-
-        // Update content
-        document.querySelectorAll('.checklist-tab-content').forEach(content => {
-          content.style.display = 'none';
-        });
-        document.getElementById(`tab-${tab}`).style.display = 'block';
+  <!-- ===== VIEW: REGRAS ===== -->
+  <div class="view" id="view-regras">
+    <div class="section-title">Regras e Protocolos</div>
+    <div id="regrasList">
+      <div class="loading"><div class="spinner"></div>Carregando...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ SHARED SCRIPTS ═══ -->
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+
+<script>
+  // ════════════════════════════════════════════════════════════════
+  // CHECKLIST APPLICATION — MAIN CODE
+  // ════════════════════════════════════════════════════════════════
+
+  // ──────────────────────────────────────────────────────────────
+  // STATE VARIABLES
+  // ──────────────────────────────────────────────────────────────
+  let equipe = [];
+  let checklistItems = [];
+  let checkedItems = new Set();
+  let pessoaSelecionada = null;
+  let tipoSelecionado = null;
+  let sigCanvas, sigCtx, isDrawing = false, hasSigned = false;
+
+  // ──────────────────────────────────────────────────────────────
+  // INITIALIZATION
+  // ──────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize signature canvas
+    initSignatureCanvas();
+
+    // Check authentication
+    const session = WC.auth.getSession();
+    if (!session) {
+      window.location.href = WC.config.BASE_URL;
+      return;
+    }
+
+    // Load equipe and auto-detect user
+    await loadEquipe();
+    setDefaultDate();
+    autoSelectUserFromSession();
+
+    // Deep link: if came from portal with ?view=reserva
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('view') === 'reserva') {
+      setTimeout(() => {
+        document.querySelectorAll('.tab')[1].click();
+      }, 300);
+    }
+  });
+
+  // ──────────────────────────────────────────────────────────────
+  // USER DETECTION FROM SESSION
+  // ──────────────────────────────────────────────────────────────
+  function autoSelectUserFromSession() {
+    const session = WC.auth.getSession();
+    if (!session || !session.user) return;
+
+    const userInfo = session.user;
+    const displayName = userInfo.apelido || userInfo.nome || '';
+
+    if (!displayName) return;
+
+    // Hide fallback dropdown
+    const selectCard = document.getElementById('selectCardFallback');
+    if (selectCard) selectCard.style.display = 'none';
+
+    // Create and display user badge
+    const badge = document.createElement('div');
+    badge.className = 'select-card';
+    badge.style.marginBottom = '16px';
+    badge.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(160,137,108,.15);border-radius:50%;">👤</span>
+        <div>
+          <div style="font-weight:600;font-size:14px;color:#0F1F3A;">${displayName}</div>
+          <div style="font-size:11px;color:#5A5A6E;text-transform:uppercase;letter-spacing:.3px;">Responsável</div>
+        </div>
+      </div>
+    `;
+
+    const container = document.getElementById('userBadgeContainer');
+    container.appendChild(badge);
+
+    // Auto-select in equipe and trigger
+    autoSelectInEquipe(userInfo.nome || userInfo.email, userInfo);
+    onPessoaChange();
+  }
+
+  function autoSelectInEquipe(nome, userInfo) {
+    const select = document.getElementById('selectPessoa');
+    const reservaSelect = document.getElementById('reservaSolicitante');
+
+    // Find matching person in equipe
+    let found = false;
+    for (let i = 1; i < select.options.length; i++) {
+      if (stripAccents(select.options[i].value) === stripAccents(nome)) {
+        select.selectedIndex = i;
+        found = true;
+        break;
       }
+    }
+
+    // If not found, add to equipe
+    if (!found) {
+      const cargoMap = { gestor: 'Administração', operador: 'Operador', locatario: 'Dentista (Locatário)' };
+      const cargo = (userInfo && userInfo.cargo) || cargoMap[(userInfo && userInfo.perfil)] || 'Equipe';
+      equipe.push({ nome: nome, cargo: cargo, podFechar: ((userInfo && userInfo.perfil) === 'gestor') });
+      select.add(new Option(nome + ' — ' + cargo, nome));
+      select.selectedIndex = select.options.length - 1;
+      reservaSelect.add(new Option(nome + ' — ' + cargo, nome));
+      reservaSelect.selectedIndex = reservaSelect.options.length - 1;
+    }
+
+    // Also select in reserva dropdown
+    for (let i = 1; i < reservaSelect.options.length; i++) {
+      if (stripAccents(reservaSelect.options[i].value) === stripAccents(nome)) {
+        reservaSelect.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  function stripAccents(str) {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // LOAD EQUIPE
+  // ──────────────────────────────────────────────────────────────
+  async function loadEquipe() {
+    try {
+      const res = await WC.api.get(WC.config.API_CHECKLIST, { action: 'getEquipe' });
+      equipe = res.data || res;
+      if (!Array.isArray(equipe)) equipe = [];
+    } catch (err) {
+      console.error('Erro ao carregar equipe:', err);
+      // Fallback with local data
+      equipe = [
+        { nome: 'Jonathan', cargo: 'Administração', podFechar: true },
+        { nome: 'André Landin', cargo: 'Administração', podFechar: false },
+        { nome: 'Dra. Jaqueline', cargo: 'Dentista', podFechar: false },
+        { nome: 'Vinícius', cargo: 'Dentista', podFechar: false },
+        { nome: 'João', cargo: 'Dentista', podFechar: false },
+        { nome: 'Luana', cargo: 'Dentista', podFechar: false },
+        { nome: 'Manuela', cargo: 'Dentista', podFechar: false },
+        { nome: 'Carlos', cargo: 'Dentista (Locatário)', podFechar: false },
+        { nome: 'Robert', cargo: 'Dentista (Locatário)', podFechar: false },
+        { nome: 'Gabriela', cargo: 'Recepcionista Operacional', podFechar: true },
+        { nome: 'Concierge', cargo: 'Recepcionista Concierge', podFechar: true },
+        { nome: 'Valet', cargo: 'Valet', podFechar: false },
+        { nome: 'Henrique', cargo: 'Laboratório', podFechar: false },
+        { nome: 'Lab Auxiliar', cargo: 'Laboratório', podFechar: false },
+        { nome: 'Flávia', cargo: 'Serviços Gerais', podFechar: false }
+      ];
+    }
+
+    populateSelects();
+  }
+
+  function populateSelects() {
+    const selectPessoa = document.getElementById('selectPessoa');
+    const reservaSolicitante = document.getElementById('reservaSolicitante');
+
+    equipe.forEach(p => {
+      const opt1 = new Option(`${p.nome} — ${p.cargo}`, p.nome);
+      const opt2 = new Option(`${p.nome} — ${p.cargo}`, p.nome);
+      selectPessoa.add(opt1);
+      reservaSolicitante.add(opt2);
+    });
+  }
+
+  function setDefaultDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('reservaData').value = today;
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // NAVIGATION
+  // ──────────────────────────────────────────────────────────────
+  function switchView(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`view-${view}`).classList.add('active');
+    event.target.classList.add('active');
+
+    const badge = document.getElementById('headerBadge');
+    if (view === 'checklist') { badge.textContent = 'Checklist'; loadContingencia(); }
+    if (view === 'reserva') { badge.textContent = 'Reserva'; loadReservas(); }
+    if (view === 'regras') { badge.textContent = 'Regras'; loadRegras(); }
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // CHECKLIST LOGIC
+  // ──────────────────────────────────────────────────────────────
+  function onPessoaChange() {
+    const nome = document.getElementById('selectPessoa').value;
+    if (!nome) {
+      pessoaSelecionada = null;
+      document.getElementById('tipoSelector').style.display = 'none';
+      document.getElementById('progressContainer').style.display = 'none';
+      document.getElementById('checklistContainer').innerHTML = '';
+      return;
+    }
+
+    pessoaSelecionada = equipe.find(p => p.nome === nome);
+    document.getElementById('tipoSelector').style.display = 'flex';
+    loadContingencia();
+
+    // Auto-select tipo based on cargo and time
+    const hora = new Date().getHours();
+    if (pessoaSelecionada.cargo === 'Serviços Gerais') {
+      selectTipo('Abertura');
+    } else if (hora >= 17) {
+      selectTipo('Fechamento');
+    }
+  }
+
+  function selectTipo(tipo) {
+    tipoSelecionado = tipo;
+    document.querySelectorAll('.tipo-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tipo === tipo);
+    });
+    loadChecklistItems();
+  }
+
+  async function loadChecklistItems() {
+    if (!pessoaSelecionada || !tipoSelecionado) return;
+
+    const container = document.getElementById('checklistContainer');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div>Carregando itens...</div>';
+
+    try {
+      const res = await WC.api.get(WC.config.API_CHECKLIST, {
+        action: 'getChecklist',
+        cargo: pessoaSelecionada.cargo,
+        tipo: tipoSelecionado
+      });
+      checklistItems = res.data || res;
+      if (!Array.isArray(checklistItems)) checklistItems = [];
+    } catch (err) {
+      // Fallback: use local data
+      checklistItems = getLocalChecklistItems(pessoaSelecionada.cargo, tipoSelecionado);
+    }
+
+    checkedItems = new Set();
+    renderChecklist();
+  }
+
+  function getLocalChecklistItems(cargo, tipo) {
+    // Complete local fallback data — ALL ITEMS PRESERVED EXACTLY
+    const allItems = {
+      'Abertura': [
+        { id: 'AB01', areaNome: 'Quadro de Energia / Registro Rua', setor: 'Externo', ordem: 18, descricao: 'Religar registro geral de energia na rua', prioridade: 'Alta' },
+        { id: 'AB02', areaNome: 'Quadro de Energia / Registro Rua', setor: 'Externo', ordem: 18, descricao: 'Religar disjuntores dos ACs externos', prioridade: 'Alta' },
+        { id: 'AB03', areaNome: 'Quadro de Energia Interno', setor: 'Infraestrutura', ordem: 17, descricao: 'Religar disjuntores internos no quadro principal', prioridade: 'Alta' },
+        { id: 'AB04', areaNome: 'Cozinha', setor: 'Fundos', ordem: 1, descricao: 'Iniciar protocolo de limpeza', prioridade: 'Normal' },
+      ],
+      'Fechamento_Dentista': [
+        { id: 'FD01', areaNome: 'Compressor / Bombas a Vácuo', setor: 'Infraestrutura', ordem: 14, descricao: 'Verificar se não há mais pacientes — desligar compressor', prioridade: 'Alta' },
+        { id: 'FD02', areaNome: 'Compressor / Bombas a Vácuo', setor: 'Infraestrutura', ordem: 14, descricao: 'Desligar bombas a vácuo', prioridade: 'Alta' },
+        { id: 'FD03', areaNome: 'Gases — Setor Clínico', setor: 'Infraestrutura', ordem: 15, descricao: 'Desconectar cartes de N₂O e O₂ da parede', prioridade: 'Alta' },
+        { id: 'FD04', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Desligar AC dos consultórios por onde passar', prioridade: 'Normal' },
+        { id: 'FD05', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Apagar luzes dos consultórios por onde passar', prioridade: 'Normal' },
+        { id: 'FD06', areaNome: 'Esterilização', setor: 'Setor Clínico', ordem: 8, descricao: 'Verificar O₂ do ozônio fechado na esterilização', prioridade: 'Alta' },
+        { id: 'FD07', areaNome: 'Porta do Jardim', setor: 'Setor Clínico', ordem: 13, descricao: 'Trancar porta de acesso ao jardim (se último do setor)', prioridade: 'Alta' },
+        { id: 'FD08', areaNome: 'Armário Externo Cilindros', setor: 'Externo', ordem: 16, descricao: 'Executar protocolo de fechamento dos cilindros', prioridade: 'Alta' },
+        { id: 'FD09', areaNome: 'Armário Externo Cilindros', setor: 'Externo', ordem: 16, descricao: 'Registrar fechamento no app de controle de gases', prioridade: 'Alta' },
+      ],
+      'Fechamento_Locatário': [
+        { id: 'FC01', areaNome: 'Salas Carlos/Robert', setor: 'Setor Clínico', ordem: 12, descricao: 'Janela externa da sala fechada', prioridade: 'Alta' },
+        { id: 'FC02', areaNome: 'Salas Carlos/Robert', setor: 'Setor Clínico', ordem: 12, descricao: 'Janela interna da sala fechada', prioridade: 'Alta' },
+        { id: 'FC03', areaNome: 'Salas Carlos/Robert', setor: 'Setor Clínico', ordem: 12, descricao: 'Sensor do alarme devidamente posicionado', prioridade: 'Alta' },
+      ],
+      'Fechamento_Responsavel': [
+        { id: 'FR01', areaNome: 'Cozinha', setor: 'Fundos', ordem: 1, descricao: 'Cozinha — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR02', areaNome: 'Auditório', setor: 'Fundos', ordem: 2, descricao: 'Auditório — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR03', areaNome: 'Auditório', setor: 'Fundos', ordem: 2, descricao: 'Auditório — AC desligado', prioridade: 'Normal' },
+        { id: 'FR04', areaNome: 'Laboratório', setor: 'Fundos', ordem: 3, descricao: 'Laboratório — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR05', areaNome: 'Laboratório', setor: 'Fundos', ordem: 3, descricao: 'Laboratório — AC desligado', prioridade: 'Normal' },
+        { id: 'FR06', areaNome: 'Administração', setor: 'Central', ordem: 4, descricao: 'Administração — computadores desligados', prioridade: 'Normal' },
+        { id: 'FR07', areaNome: 'Administração', setor: 'Central', ordem: 4, descricao: 'Administração — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR08', areaNome: 'Sala 209', setor: 'Central', ordem: 5, descricao: 'Sala 209 — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR09', areaNome: 'Sala 209', setor: 'Central', ordem: 5, descricao: 'Sala 209 — AC desligado', prioridade: 'Normal' },
+        { id: 'FR10', areaNome: 'Sala 8 / Consultório 8', setor: 'Central', ordem: 6, descricao: 'Sala 8 — cilindro O₂ fechado', prioridade: 'Alta' },
+        { id: 'FR11', areaNome: 'Sala 8 / Consultório 8', setor: 'Central', ordem: 6, descricao: 'Sala 8 — cilindro N₂O fechado', prioridade: 'Alta' },
+        { id: 'FR12', areaNome: 'Sala 8 / Consultório 8', setor: 'Central', ordem: 6, descricao: 'Sala 8 — AC desligado', prioridade: 'Normal' },
+        { id: 'FR13', areaNome: 'Sala 8 / Consultório 8', setor: 'Central', ordem: 6, descricao: 'Sala 8 — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR14', areaNome: 'Sala dos Dentistas', setor: 'Setor Clínico', ordem: 7, descricao: 'Sala dos Dentistas — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR15', areaNome: 'Sala dos Dentistas', setor: 'Setor Clínico', ordem: 7, descricao: 'Sala dos Dentistas — AC desligado', prioridade: 'Normal' },
+        { id: 'FR16', areaNome: 'Sala dos Dentistas', setor: 'Setor Clínico', ordem: 7, descricao: 'Sala dos Dentistas — computadores desligados', prioridade: 'Normal' },
+        { id: 'FR17', areaNome: 'Esterilização', setor: 'Setor Clínico', ordem: 8, descricao: 'Esterilização — O₂ do ozônio fechado', prioridade: 'Alta' },
+        { id: 'FR18', areaNome: 'Esterilização', setor: 'Setor Clínico', ordem: 8, descricao: 'Esterilização — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR19', areaNome: 'Corredor Clínico', setor: 'Setor Clínico', ordem: 9, descricao: 'Corredor clínico — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR20', areaNome: 'Escada', setor: 'Setor Clínico', ordem: 10, descricao: 'Escada — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR21', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Consultórios — portas fechadas', prioridade: 'Normal' },
+        { id: 'FR22', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Consultórios — ACs desligados', prioridade: 'Normal' },
+        { id: 'FR23', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Consultórios — computadores desligados', prioridade: 'Normal' },
+        { id: 'FR24', areaNome: 'Consultórios (Geral)', setor: 'Setor Clínico', ordem: 11, descricao: 'Consultórios — luzes apagadas', prioridade: 'Normal' },
+        { id: 'FR25', areaNome: 'Salas Carlos/Robert', setor: 'Setor Clínico', ordem: 12, descricao: 'Salas Carlos/Robert — janelas fechadas e sensor posicionado', prioridade: 'Alta' },
+        { id: 'FR26', areaNome: 'Porta do Jardim', setor: 'Setor Clínico', ordem: 13, descricao: 'Porta do jardim — trancada', prioridade: 'Alta' },
+        { id: 'FR27', areaNome: 'Compressor / Bombas a Vácuo', setor: 'Infraestrutura', ordem: 14, descricao: 'Compressor desligado', prioridade: 'Alta' },
+        { id: 'FR28', areaNome: 'Compressor / Bombas a Vácuo', setor: 'Infraestrutura', ordem: 14, descricao: 'Bombas a vácuo desligadas', prioridade: 'Alta' },
+        { id: 'FR29', areaNome: 'Gases — Setor Clínico', setor: 'Infraestrutura', ordem: 15, descricao: 'Cartes de N₂O/O₂ desconectados', prioridade: 'Alta' },
+        { id: 'FR30', areaNome: 'Armário Externo Cilindros', setor: 'Externo', ordem: 16, descricao: 'Cilindros do armário externo — protocolo de fechamento', prioridade: 'Alta' },
+        { id: 'FR31', areaNome: 'Quadro de Energia Interno', setor: 'Infraestrutura', ordem: 17, descricao: 'Quadro interno — disjuntores desligados (exceto etiquetados)', prioridade: 'Alta' },
+        { id: 'FR32', areaNome: 'Quadro de Energia / Registro Rua', setor: 'Externo', ordem: 18, descricao: 'Registro geral de energia na rua — desligado', prioridade: 'Alta' },
+        { id: 'FR33', areaNome: 'Quadro de Energia / Registro Rua', setor: 'Externo', ordem: 18, descricao: 'Disjuntores ACs externos — desligados', prioridade: 'Alta' },
+        { id: 'FR34', areaNome: 'Alarme', setor: 'Geral', ordem: 19, descricao: 'Alarme da clínica — ATIVADO', prioridade: 'Alta' },
+      ]
     };
 
-    // ─── Initialize on page load ───
-    document.addEventListener('DOMContentLoaded', () => {
-      app.init();
+    if (tipo === 'Abertura') return allItems['Abertura'];
+
+    // Fechamento - determine profile
+    const isLocatario = cargo.includes('Locatário');
+    const isDentista = cargo.includes('Dentista') || cargo === 'Auxiliar';
+    const isResponsavel = cargo === 'Administração' || cargo.includes('Recepcionista');
+
+    let items = [];
+    if (isResponsavel) {
+      items = allItems['Fechamento_Responsavel'];
+    } else if (isLocatario) {
+      items = [...allItems['Fechamento_Dentista'], ...allItems['Fechamento_Locatário']];
+    } else if (isDentista) {
+      items = allItems['Fechamento_Dentista'];
+    }
+
+    return items.sort((a, b) => a.ordem - b.ordem);
+  }
+
+  function renderChecklist() {
+    const container = document.getElementById('checklistContainer');
+    container.innerHTML = '';
+
+    if (checklistItems.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Nenhum item para este perfil.</p></div>';
+      return;
+    }
+
+    // Group by area
+    const groups = {};
+    checklistItems.forEach(item => {
+      const key = item.areaNome;
+      if (!groups[key]) groups[key] = { setor: item.setor, items: [] };
+      groups[key].items.push(item);
     });
 
-    // Populate cilindro selector
-    document.addEventListener('DOMContentLoaded', () => {
-      const select = document.getElementById('reservaCilindro');
-      WC.config.CILINDROS.forEach(cilindro => {
-        const option = document.createElement('option');
-        option.value = cilindro.id;
-        option.textContent = `${cilindro.id} (${cilindro.tipo} - ${cilindro.capacidade})`;
-        select.appendChild(option);
+    let delay = 0;
+    Object.entries(groups).forEach(([area, group]) => {
+      const div = document.createElement('div');
+      div.className = 'area-group';
+      div.style.animationDelay = `${delay}ms`;
+      delay += 80;
+
+      div.innerHTML = `
+        <div class="area-header">
+          <div class="area-dot"></div>
+          <span class="area-name">${area}</span>
+          <span class="area-setor">${group.setor}</span>
+        </div>
+      `;
+
+      group.items.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = `check-item ${item.prioridade === 'Alta' ? 'alta' : ''}`;
+        itemEl.dataset.id = item.id;
+        itemEl.onclick = () => toggleItem(item.id, itemEl);
+
+        itemEl.innerHTML = `
+          <div class="check-box">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="check-content">
+            <div class="check-desc">${item.descricao}</div>
+            ${item.prioridade === 'Alta' ? '<div class="check-priority">⚡ Alta prioridade</div>' : ''}
+          </div>
+        `;
+
+        div.appendChild(itemEl);
       });
+
+      container.appendChild(div);
     });
-  </script>
+
+    // Show controls
+    document.getElementById('progressContainer').style.display = 'block';
+    document.getElementById('obsSection').style.display = 'block';
+    document.getElementById('sigSection').style.display = 'block';
+    document.getElementById('submitBtn').style.display = 'block';
+    updateProgress();
+  }
+
+  function toggleItem(id, el) {
+    if (checkedItems.has(id)) {
+      checkedItems.delete(id);
+      el.classList.remove('checked');
+    } else {
+      checkedItems.add(id);
+      el.classList.add('checked');
+    }
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const total = checklistItems.length;
+    const done = checkedItems.size;
+    const pct = total > 0 ? (done / total) * 100 : 0;
+
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    document.getElementById('progressCount').textContent = `${done} / ${total}`;
+
+    const text = document.getElementById('progressText');
+    if (pct === 100) {
+      text.textContent = '✅ Tudo verificado!';
+      text.style.color = 'var(--verde)';
+    } else if (pct >= 50) {
+      text.textContent = 'Bom progresso...';
+      text.style.color = 'var(--dourado)';
+    } else {
+      text.textContent = 'Progresso';
+      text.style.color = 'var(--azul)';
+    }
+
+    // Enable submit if has at least 1 item and signature
+    document.getElementById('submitBtn').disabled = !(done > 0 && hasSigned);
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // CONTINGENCY
+  // ──────────────────────────────────────────────────────────────
+  async function loadContingencia() {
+    try {
+      const res = await WC.api.get(WC.config.API_CHECKLIST, { action: 'getContingencia' });
+      const data = res.data || res;
+      showContingencia(data);
+    } catch (err) {
+      // Fallback local
+      const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const hoje = dias[new Date().getDay()];
+      let backup = 'Gabriela';
+      if (hoje === 'Qui') backup = 'Concierge';
+      showContingencia({
+        diaSemana: hoje,
+        responsavelPrincipal: 'Jonathan',
+        backup: backup
+      });
+    }
+  }
+
+  function showContingencia(data) {
+    const div = document.getElementById('contingenciaInfo');
+    div.style.display = 'block';
+    document.getElementById('contDia').textContent = `${data.diaSemana} — Hoje`;
+    document.getElementById('contTexto').innerHTML = `
+      Fechamento: <strong>${data.responsavelPrincipal}</strong> ·
+      Backup: <strong>${data.backup}</strong>
+    `;
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // SUBMIT CHECKLIST
+  // ──────────────────────────────────────────────────────────────
+  async function submitChecklist() {
+    if (!pessoaSelecionada || !tipoSelecionado) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const pendencias = checklistItems
+      .filter(item => !checkedItems.has(item.id))
+      .map(item => item.descricao);
+
+    const pendenciasAlta = checklistItems
+      .filter(item => !checkedItems.has(item.id) && item.prioridade === 'Alta')
+      .map(item => item.descricao);
+
+    // Determine profile
+    let perfil = 'Responsável Fechamento';
+    if (tipoSelecionado === 'Abertura') perfil = 'Abertura';
+    else if (pessoaSelecionada.cargo.includes('Locatário')) perfil = 'Locatário';
+    else if (pessoaSelecionada.cargo.includes('Dentista')) perfil = 'Dentista';
+
+    const payload = {
+      action: 'submitChecklist',
+      tipo: tipoSelecionado,
+      responsavel: pessoaSelecionada.nome,
+      cargo: pessoaSelecionada.cargo,
+      perfil: perfil,
+      itensConcluidos: checkedItems.size,
+      totalItens: checklistItems.length,
+      pendencias: pendencias,
+      pendenciasAlta: pendenciasAlta,
+      observacoes: document.getElementById('obsText').value,
+      assinatura: pessoaSelecionada.nome
+    };
+
+    try {
+      const res = await WC.api.post(WC.config.API_CHECKLIST, payload);
+
+      if (res.success) {
+        showToast('✅ Checklist registrado com sucesso!', 'success');
+        resetChecklist();
+      } else {
+        showToast('❌ Erro: ' + (res.error || 'Tente novamente'), 'error');
+      }
+    } catch (err) {
+      showToast('❌ Erro de conexão. Verifique sua internet.', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Registrar Checklist';
+  }
+
+  function resetChecklist() {
+    checkedItems = new Set();
+    document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'));
+    document.getElementById('obsText').value = '';
+    clearSignature();
+    updateProgress();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // ROOM RESERVATION
+  // ──────────────────────────────────────────────────────────────
+  async function submitReserva() {
+    const sol = document.getElementById('reservaSolicitante').value;
+    const sala = document.getElementById('reservaSala').value;
+    const data = document.getElementById('reservaData').value;
+    const inicio = document.getElementById('reservaInicio').value;
+    const fim = document.getElementById('reservaFim').value;
+    const motivo = document.getElementById('reservaMotivo').value;
+
+    if (!sol || !sala || !data || !inicio || !fim || !motivo) {
+      showToast('Preencha todos os campos', 'error');
+      return;
+    }
+
+    const payload = {
+      action: 'submitReserva',
+      solicitante: sol,
+      sala: sala,
+      dataReserva: data,
+      horaInicio: inicio,
+      horaFim: fim,
+      motivo: motivo
+    };
+
+    try {
+      const res = await WC.api.post(WC.config.API_CHECKLIST, payload);
+      if (res.success) {
+        showToast('✅ Reserva solicitada! Aguarde aprovação.', 'success');
+        document.getElementById('reservaMotivo').value = '';
+        loadReservas();
+      } else {
+        showToast('❌ ' + (res.error || 'Erro ao enviar'), 'error');
+      }
+    } catch (err) {
+      showToast('❌ Erro de conexão', 'error');
+    }
+  }
+
+  async function loadReservas() {
+    const container = document.getElementById('reservasList');
+    try {
+      const res = await WC.api.get(WC.config.API_CHECKLIST, { action: 'getReservas' });
+      const reservas = res.data || res;
+      if (!Array.isArray(reservas)) reservas = [];
+
+      if (reservas.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🗓</div><p>Nenhuma reserva registrada.</p></div>';
+        return;
+      }
+
+      container.innerHTML = reservas.map(r => `
+        <div class="reserva-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4>${r.sala}</h4>
+            <span class="status-badge ${r.status.toLowerCase()}">${r.status}</span>
+          </div>
+          <div class="reserva-detail">
+            <strong>${r.solicitante}</strong> · ${r.dataReserva}<br>
+            ${r.horaInicio} às ${r.horaFim}<br>
+            ${r.motivo}
+            ${r.aprovadoPor ? '<br><em>Aprovado por: ' + r.aprovadoPor + '</em>' : ''}
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">📡</div><p>Não foi possível carregar reservas.</p></div>';
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // RULES AND PROTOCOLS
+  // ──────────────────────────────────────────────────────────────
+  async function loadRegras() {
+    const container = document.getElementById('regrasList');
+    try {
+      const res = await WC.api.get(WC.config.API_CHECKLIST, { action: 'getRegras' });
+      const regras = res.data || res;
+      if (!Array.isArray(regras)) regras = [];
+
+      container.innerHTML = regras.map(r => `
+        <div class="regras-card">
+          <div class="regra-categoria">${r.categoria}</div>
+          <div class="regra-texto">${r.regra}</div>
+          ${r.observacao ? `<div class="regra-obs">${r.observacao}</div>` : ''}
+          <div style="font-size:0.7rem; color:var(--cinza-texto); margin-top:6px;">Aplica-se a: ${r.aplicaSe}</div>
+        </div>
+      `).join('');
+    } catch (err) {
+      // Fallback local
+      container.innerHTML = `
+        <div class="regras-card"><div class="regra-categoria">Horário</div><div class="regra-texto">Ninguém entra na clínica antes das 6h da manhã</div><div class="regra-obs">Aviso com 1 dia de antecedência para reorganizar alarme</div></div>
+        <div class="regras-card"><div class="regra-categoria">Horário</div><div class="regra-texto">Jonathan sai até no máximo às 21h</div></div>
+        <div class="regras-card"><div class="regra-categoria">Horário</div><div class="regra-texto">Permanência máxima de 9 horas por pessoa</div></div>
+        <div class="regras-card"><div class="regra-categoria">Sábado</div><div class="regra-texto">Flávia faz limpeza e sai ao meio-dia. Alarme ativa automaticamente às 14h.</div><div class="regra-obs">Religa apenas na segunda-feira</div></div>
+        <div class="regras-card"><div class="regra-categoria">Contingência</div><div class="regra-texto">Seg/Ter/Qua/Sex — Gabriela assume fechamento na ausência de Jonathan</div><div class="regra-obs">Clínica encerra na saída dela. Não negociável.</div></div>
+        <div class="regras-card"><div class="regra-categoria">Contingência</div><div class="regra-texto">Qui — Concierge assume fechamento na ausência de Jonathan</div></div>
+        <div class="regras-card"><div class="regra-categoria">Laboratório</div><div class="regra-texto">Nenhum dentista opera no laboratório — enviar material ao lab</div><div class="regra-obs">Lab faz o trabalho, sem custo extra ao dentista</div></div>
+        <div class="regras-card"><div class="regra-categoria">Reserva Sala</div><div class="regra-texto">Atendimentos fora do horário devem ser informados e confirmados por Jonathan ou Dra. Jaqueline</div></div>
+        <div class="regras-card"><div class="regra-categoria">Energia</div><div class="regra-texto">Desligar todos os disjuntores exceto etiquetados (servidores, geladeiras)</div></div>
+      `;
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // DIGITAL SIGNATURE
+  // ──────────────────────────────────────────────────────────────
+  function initSignatureCanvas() {
+    sigCanvas = document.getElementById('sigCanvas');
+    sigCtx = sigCanvas.getContext('2d');
+
+    const resize = () => {
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCanvas.width = rect.width * 2;
+      sigCanvas.height = rect.height * 2;
+      sigCtx.scale(2, 2);
+      sigCtx.strokeStyle = '#0F1F3A';
+      sigCtx.lineWidth = 2;
+      sigCtx.lineCap = 'round';
+      sigCtx.lineJoin = 'round';
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Mouse events
+    sigCanvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCtx.beginPath();
+      sigCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    sigCanvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      sigCtx.stroke();
+      hasSigned = true;
+      sigCanvas.classList.add('signed');
+      updateProgress();
+    });
+
+    sigCanvas.addEventListener('mouseup', () => { isDrawing = false; });
+    sigCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+    // Touch events
+    sigCanvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isDrawing = true;
+      const touch = e.touches[0];
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCtx.beginPath();
+      sigCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    });
+
+    sigCanvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isDrawing) return;
+      const touch = e.touches[0];
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      sigCtx.stroke();
+      hasSigned = true;
+      sigCanvas.classList.add('signed');
+      updateProgress();
+    });
+
+    sigCanvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      isDrawing = false;
+    });
+  }
+
+  function clearSignature() {
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    hasSigned = false;
+    sigCanvas.classList.remove('signed');
+    updateProgress();
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // UTILITIES
+  // ──────────────────────────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast show';
+    if (type) toast.classList.add(type);
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+</script>
 
 </body>
 </html>
