@@ -22,8 +22,8 @@ WC.config = {
     gases:     { title: 'Controle de Gases',   icon: '🫁', page: 'gases.html',     color: 'verde' },
     checklist: { title: 'Checklist do Dia',     icon: '✅', page: 'checklist.html',  color: 'dourado' },
     dashboard: { title: 'Dashboard',            icon: '📊', page: 'dashboard.html',  color: 'azul', perfil: ['gestor'] },
+    entregas:  { title: 'Controle de Entregas', icon: '📦', page: 'entregas.html',   color: 'dourado' },
     // Futuros módulos:
-    // entregas:   { title: 'Controle de Entregas', icon: '📦', page: 'entregas.html',   color: 'dourado' },
     // financeiro: { title: 'Financeiro',           icon: '💰', page: 'financeiro.html',  color: 'verde', perfil: ['gestor'] },
     // ponto:      { title: 'Controle de Ponto',    icon: '🕐', page: 'ponto.html',       color: 'azul' },
   },
